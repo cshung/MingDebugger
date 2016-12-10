@@ -1,7 +1,5 @@
 #include "argument_parser.h"
-#include <fstream>
-
-using namespace std;
+#include "utilities.h"
 
 arguments::arguments()
 {
@@ -16,17 +14,17 @@ arguments check_arguments(int argc, char** argv)
     {
         result.error = "MingCompiler program.source";
     }
+    else if (!is_ends_with(argv[1], ".source"))
+    {
+        result.error = "Source file must have extension .source";
+    }
+    else if (!is_file_exists(argv[1]))
+    {
+        result.error = "source file does not exists";
+    }
     else
     {
-        ifstream f(argv[1]);
-        if (f.good())
-        {
-            result.filename = argv[1];
-        }
-        else
-        {
-            result.error = "source file does not exists";
-        }
+        result.filename = argv[1];
     }
 
     return result;
