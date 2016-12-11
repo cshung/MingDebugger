@@ -12,6 +12,7 @@ private:
     function_node* parse_function();
     statement_node* parse_statement();
     condition_node* parse_condition();
+    value_node* parse_value();
 };
 
 parser::parser(scanner* scanner)
@@ -133,13 +134,35 @@ statement_node* parser_impl::parse_statement()
     }
     else if (this->m_scanner->get_token_type() == _return)
     {
-        // TODO: Work on the return statement!
+        return_statement_node* return_result = new return_statement_node();
+        result = return_result;
+        this->m_scanner->scan();
+        return_result->value = this->parse_value();
+        if (return_result->value != nullptr)
+        {
+            if (this->m_scanner->get_token_type() == semi_colon)
+            {
+                this->m_scanner->scan();
+                return result;
+            }
+        }
     }
     if (result != nullptr)
     {
         delete result;
     }
     return nullptr;
+}
+
+value_node* parser_impl::parse_value()
+{
+    value_node* result = nullptr;
+    // TODO: Parsing a value
+    if (result != nullptr)
+    {
+        delete result;
+    }
+    return result;
 }
 
 condition_node* parser_impl::parse_condition()
@@ -218,5 +241,18 @@ condition_node::~condition_node()
     if (this->variable_name != nullptr)
     {
         delete[] this->variable_name;
+    }
+}
+
+return_statement_node::return_statement_node()
+{
+    this->value = nullptr;
+}
+
+return_statement_node::~return_statement_node()
+{
+    if (this->value != nullptr)
+    {
+        delete this->value;
     }
 }

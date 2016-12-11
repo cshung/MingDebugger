@@ -7,6 +7,7 @@ struct function_node;
 struct statement_node;
 struct if_statement_node;
 struct condition_node;
+struct value_node;
 class parser_impl;
 
 struct program_node
@@ -36,11 +37,23 @@ struct if_statement_node : public statement_node
     statement_node* false_statement;
 };
 
+struct return_statement_node : public statement_node
+{
+    return_statement_node();
+    ~return_statement_node();
+    value_node* value;
+};
+
 struct condition_node
 {
     ~condition_node();
     char* variable_name;
     int value;
+};
+
+struct value_node
+{
+    virtual ~value_node();
 };
 
 class parser
