@@ -1,5 +1,6 @@
 #include "utilities.h"
 #include <fstream>
+#include <vector>
 using namespace std;
 
 bool is_file_exists(const char* filename)
@@ -26,4 +27,26 @@ bool is_ends_with(const char* source, const char* pattern)
     }
 
     return true;
+}
+
+char* read_all_text(const char* filename)
+{
+    vector<char> buffer;
+    ifstream f(filename);
+    while (true)
+    {
+        char c = f.get();
+        if (f.eof())
+        {
+            break;
+        }
+        buffer.push_back(c);
+    }
+    char* result = new char[buffer.size() + 1];
+    for (size_t i = 0; i < buffer.size(); i++)
+    {
+        result[i] = buffer[i];
+    }
+    result[buffer.size()] = '\0';
+    return result;
 }

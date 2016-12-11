@@ -1,4 +1,7 @@
 #include "compiler.h"
+
+#include "scanner.h"
+
 #include <iostream>
 using namespace std;
 
@@ -28,5 +31,5 @@ compiler_impl::compiler_impl(const char* source_file)
 
 void compiler_impl::compile()
 {
-    cout << "do something with " << this->source_file << endl;
+    scanner s(this->source_file);
 }
