@@ -1,6 +1,9 @@
 #include "scanner.h"
 #include "utilities.h"
 
+#include <iostream>
+using namespace std;
+
 class scanner_impl
 {
 public:
@@ -37,18 +40,111 @@ scanner_impl::scanner_impl(const char* source_file)
 void scanner_impl::scan()
 {
     // Step 1: Skip away any whitespace, not interesting at all
-    while (*p == ' ')
+    while (*p == ' ' || *p == '\r' || *p == '\n')
     {
         p++;
     }
-    if (is_begins_with(p, "function "))
+
+    char c = *p;
+    switch (c)
     {
-        this->m_token_type = function;
-        p = p + 8;
-    }
-    else
-    {
-        this->m_token_type = identifier;
+    case ';':
+        this->m_token_type = semi_colon;
+        p++;
+        break;
+    case '{':
+        this->m_token_type = left_brace;
+        p++;
+        break;
+    case '}':
+        this->m_token_type = right_brace;
+        p++;
+        break;
+    case '(':
+        this->m_token_type = left_bracket;
+        p++;
+        break;
+    case ')':
+        this->m_token_type = right_bracket;
+        p++;
+        break;
+    case '=':
+        this->m_token_type = equals;
+        p++;
+        break;
+    case '+':
+        this->m_token_type = _plus;
+        p++;
+        break;
+    case '-':
+        this->m_token_type = _minus;
+        p++;
+        break;
+    case '\0':
+        this->m_token_type = eof;
+        break;
+    default:
+        const char* op = p;
+        if (is_begins_with(p, "function"))
+        {
+            p = p + 8;
+            c = *p;
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t' || c == '\0')
+            {
+                this->m_token_type = function;
+                break;
+            }
+        }
+        else if (is_begins_with(p, "if"))
+        {
+            p = p + 2;
+            c = *p;
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t' || c == '\0')
+            {
+                this->m_token_type = _if;
+                break;
+            }
+        }
+        else if (is_begins_with(p, "else"))
+        {
+            p = p + 4;
+            c = *p;
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t' || c == '\0')
+            {
+                this->m_token_type = _else;
+                break;
+            }
+        }
+        else if (is_begins_with(p, "return"))
+        {
+            p = p + 6;
+            c = *p;
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t' || c == '\0')
+            {
+                this->m_token_type = _return;
+                break;
+            }
+        }
+        else if ('a' <= *p && *p <= 'z') {
+            while ('a' <= *p && *p <= 'z')
+            {
+                p++;
+            }
+            this->m_token_type = identifier;
+        }
+        else if ('0' <= *p && *p <= '9')
+        {
+            while ('0' <= *p && *p <= '9')
+            {
+                p++;
+            }
+            this->m_token_type = integer;
+        }
+        else
+        {
+            cout << p;
+            this->m_token_type = error;
+        }
     }
 }
 
