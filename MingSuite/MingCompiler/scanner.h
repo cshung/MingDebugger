@@ -31,6 +31,8 @@ public:
     token_type get_token_type();
     const char* get_token_begin();
     const char* get_token_end();
+    char* get_token_string();
+    int get_token_integer_value();
 private:
     scanner_impl* impl;
 };

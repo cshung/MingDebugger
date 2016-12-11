@@ -13,6 +13,8 @@ public:
     token_type get_token_type();
     const char* get_token_begin();
     const char* get_token_end();
+    char* get_token_string();
+    int get_token_integer_value();
 private:
     const char* source_text;
     const char* p;
@@ -49,6 +51,16 @@ const char* scanner::get_token_begin()
 const char* scanner::get_token_end()
 {
     return this->impl->get_token_end();
+}
+
+char* scanner::get_token_string()
+{
+    return this->impl->get_token_string();
+}
+
+int scanner::get_token_integer_value()
+{
+    return this->impl->get_token_integer_value();
 }
 
 scanner_impl::scanner_impl(const char* source_file)
@@ -187,4 +199,28 @@ const char* scanner_impl::get_token_begin()
 const char* scanner_impl::get_token_end()
 {
     return this->m_token_end;
+}
+
+char* scanner_impl::get_token_string()
+{
+    int length = this->get_token_end() - this->get_token_begin();
+    char* result = new char[length + 1];
+    char* output = result;
+    for (const char* p = this->get_token_begin(); p < this->get_token_end(); p++, output++)
+    {
+        *output = *p;
+    }
+    *output = '\0';
+    return result;
+}
+
+int scanner_impl::get_token_integer_value()
+{
+    int result = 0;
+    for (const char* p = this->get_token_begin(); p < this->get_token_end(); p++)
+    {
+        result *= 10;
+        result += (*p - '0');
+    }
+    return result;
 }
