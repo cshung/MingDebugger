@@ -32,4 +32,6 @@ compiler_impl::compiler_impl(const char* source_file)
 void compiler_impl::compile()
 {
     scanner s(this->source_file);
+    s.scan();
+    cout << s.get_token_type() << endl;
 }
