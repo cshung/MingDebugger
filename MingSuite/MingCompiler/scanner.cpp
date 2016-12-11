@@ -8,17 +8,27 @@ class scanner_impl
 {
 public:
     scanner_impl(const char* source_file);
+    ~scanner_impl();
     void scan();
     token_type get_token_type();
+    const char* get_token_begin();
+    const char* get_token_end();
 private:
     const char* source_text;
     const char* p;
     token_type m_token_type;
+    const char* m_token_begin;
+    const char* m_token_end;
 };
 
 scanner::scanner(const char* source_file)
 {
     this->impl = new scanner_impl(source_file);
+}
+
+scanner::~scanner()
+{
+    delete this->impl;
 }
 
 void scanner::scan()
@@ -31,10 +41,25 @@ token_type scanner::get_token_type()
     return impl->get_token_type();
 }
 
+const char* scanner::get_token_begin()
+{
+    return this->impl->get_token_begin();
+}
+
+const char* scanner::get_token_end()
+{
+    return this->impl->get_token_end();
+}
+
 scanner_impl::scanner_impl(const char* source_file)
 {
     this->source_text = read_all_text(source_file);
     this->p = this->source_text;
+}
+
+scanner_impl::~scanner_impl()
+{
+    delete[] this->source_text;
 }
 
 void scanner_impl::scan()
@@ -44,7 +69,7 @@ void scanner_impl::scan()
     {
         p++;
     }
-
+    this->m_token_begin = p;
     char c = *p;
     switch (c)
     {
@@ -84,7 +109,6 @@ void scanner_impl::scan()
         this->m_token_type = eof;
         break;
     default:
-        const char* op = p;
         if (is_begins_with(p, "function"))
         {
             p = p + 8;
@@ -125,7 +149,8 @@ void scanner_impl::scan()
                 break;
             }
         }
-        else if ('a' <= *p && *p <= 'z') {
+        else if ('a' <= *p && *p <= 'z')
+        {
             while ('a' <= *p && *p <= 'z')
             {
                 p++;
@@ -146,9 +171,20 @@ void scanner_impl::scan()
             this->m_token_type = error;
         }
     }
+    this->m_token_end = p;
 }
 
 token_type scanner_impl::get_token_type()
 {
     return this->m_token_type;
+}
+
+const char* scanner_impl::get_token_begin()
+{
+    return this->m_token_begin;
+}
+
+const char* scanner_impl::get_token_end()
+{
+    return this->m_token_end;
 }

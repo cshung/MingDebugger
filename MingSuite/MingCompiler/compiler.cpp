@@ -9,6 +9,7 @@ class compiler_impl
 {
 public:
     compiler_impl(const char* source_file);
+    ~compiler_impl();
     void compile();
 private:
     const char* source_file;
@@ -19,6 +20,11 @@ compiler::compiler(const char* source_file)
     this->impl = new compiler_impl(source_file);
 }
 
+compiler::~compiler()
+{
+    delete this->impl;
+}
+
 void compiler::compile()
 {
     this->impl->compile();
@@ -27,6 +33,11 @@ void compiler::compile()
 compiler_impl::compiler_impl(const char* source_file)
 {
     this->source_file = source_file;
+}
+
+compiler_impl::~compiler_impl()
+{
+
 }
 
 void compiler_impl::compile()
@@ -86,6 +97,13 @@ void compiler_impl::compile()
             cout << "ERROR!";
             break;
         }
+        cout << endl;
+        for (const char* p = s.get_token_begin(); p < s.get_token_end(); p++)
+        {
+            cout << *p;
+        }
+        cout << endl;
+
         if (s.get_token_type() == eof)
         {
             return;

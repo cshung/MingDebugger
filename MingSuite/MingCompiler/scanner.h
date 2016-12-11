@@ -26,8 +26,11 @@ class scanner
 {
 public:
     scanner(const char* source_file);
+    ~scanner();
     void scan();
     token_type get_token_type();
+    const char* get_token_begin();
+    const char* get_token_end();
 private:
     scanner_impl* impl;
 };
