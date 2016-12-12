@@ -40,7 +40,8 @@ program_node* parser_impl::parse()
 program_node* parser_impl::parse_program()
 {
     program_node* result = new program_node();
-	function_node* last_function = parse_function();
+	result->function = parse_function();
+	function_node* last_function = result->function;
 	if (last_function != nullptr)
 	{
 		while (this->m_scanner->get_token_type() == function)
@@ -57,6 +58,7 @@ program_node* parser_impl::parse_program()
 			else
 			{
 				last_function->next_function = other;
+				last_function = other;
 			}
 		}
 		if (this->m_scanner->get_token_type() == eof)
