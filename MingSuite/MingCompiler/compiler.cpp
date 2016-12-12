@@ -45,5 +45,6 @@ void compiler_impl::compile()
 {
     scanner s(this->source_file);
     parser p(&s);
-    p.parse();
+    program_node* program = p.parse();
+	cout << program << endl;
 }

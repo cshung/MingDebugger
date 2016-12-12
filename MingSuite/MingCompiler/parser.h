@@ -12,6 +12,8 @@ class parser_impl;
 
 struct program_node
 {
+	~program_node();
+	function_node* function;
 };
 
 struct function_node
@@ -85,6 +87,13 @@ struct plus_node : public expression_node
     virtual ~plus_node();
     expression_node* left;
     term_node* right;
+};
+
+struct minus_node : public expression_node
+{
+	virtual ~minus_node();
+	expression_node* left;
+	term_node* right;
 };
 
 class parser

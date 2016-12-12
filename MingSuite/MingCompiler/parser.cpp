@@ -40,7 +40,7 @@ program_node* parser_impl::parse()
 program_node* parser_impl::parse_program()
 {
     program_node* result = new program_node();
-    parse_function();
+    result->function = parse_function();
     // TODO: Parse more functions
     return result;
 }
@@ -71,7 +71,6 @@ function_node* parser_impl::parse_function()
                             result->statement = this->parse_statement();
                             if (result->statement != nullptr)
                             {
-                                this->m_scanner->scan();
                                 if (this->m_scanner->get_token_type() == right_brace)
                                 {
                                     this->m_scanner->scan();
@@ -171,6 +170,10 @@ expression_node* parser_impl::parse_expression()
 		{
 			return this->parse_expression_suffix(term);
 		}
+		else if (this->m_scanner->get_token_type() == _minus)
+		{
+			return this->parse_expression_suffix(term);
+		}
 		else
 		{
 			return result;
@@ -199,6 +202,33 @@ expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
 			{
 				return this->parse_expression_suffix(result);
 			}
+			else if (this->m_scanner->get_token_type() == _minus)
+			{
+				return this->parse_expression_suffix(result);
+			}
+			else
+			{
+				return result;
+			}
+		}
+	}
+	else if (this->m_scanner->get_token_type() == _minus)
+	{
+		minus_node* minus_result = new minus_node();
+		result = minus_result;
+		minus_result->left = prefix;
+		this->m_scanner->scan();
+		minus_result->right = this->parse_term();
+		if (minus_result->right != nullptr)
+		{
+			if (this->m_scanner->get_token_type() == _plus)
+			{
+				return this->parse_expression_suffix(result);
+			}
+			else if (this->m_scanner->get_token_type() == _minus)
+			{
+				return this->parse_expression_suffix(result);
+			}
 			else
 			{
 				return result;
@@ -220,6 +250,7 @@ term_node* parser_impl::parse_term()
     if (this->m_scanner->get_token_type() == integer)
     {
         literal_node* literal_result = new literal_node();
+		literal_result->value = this->m_scanner->get_token_integer_value();
         this->m_scanner->scan();
         return literal_result;
     }
@@ -282,6 +313,14 @@ condition_node* parser_impl::parse_condition()
     }
     delete result;
     return nullptr;
+}
+
+program_node::~program_node()
+{
+	if (this->function != nullptr)
+	{
+		delete this->function;
+	}
 }
 
 function_node::function_node()
@@ -392,4 +431,16 @@ plus_node::~plus_node()
     {
         delete this->right;
     }
+}
+
+minus_node::~minus_node()
+{
+	if (this->left)
+	{
+		delete this->left;
+	}
+	if (this->right)
+	{
+		delete this->right;
+	}
 }

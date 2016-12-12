@@ -1,8 +1,8 @@
 MingSuite/.vs
 MingSuite/Debug
 MingSuite/MingCompiler/Debug
-MingSuite/MingSuite.VC.opendb
 MingSuite/MingCompiler/x64/
-MingSuite/MingSuite.VC.db
 MingSuite/x64/
 *.sdf
+*.db
+*.opendb
