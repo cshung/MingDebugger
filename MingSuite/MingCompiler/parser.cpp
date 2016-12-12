@@ -12,7 +12,8 @@ private:
     function_node* parse_function();
     statement_node* parse_statement();
     condition_node* parse_condition();
-    value_node* parse_value();
+    expression_node* parse_expression();
+    term_node* parse_term();
 };
 
 parser::parser(scanner* scanner)
@@ -137,7 +138,7 @@ statement_node* parser_impl::parse_statement()
         return_statement_node* return_result = new return_statement_node();
         result = return_result;
         this->m_scanner->scan();
-        return_result->value = this->parse_value();
+        return_result->value = this->parse_expression();
         if (return_result->value != nullptr)
         {
             if (this->m_scanner->get_token_type() == semi_colon)
@@ -154,10 +155,55 @@ statement_node* parser_impl::parse_statement()
     return nullptr;
 }
 
-value_node* parser_impl::parse_value()
+expression_node* parser_impl::parse_expression()
 {
-    value_node* result = nullptr;
-    // TODO: Parsing a value
+    expression_node* result = nullptr;
+    term_node* term = this->parse_term();
+    // TODO: Handle sums here, how do I make sum nodes left associative here?
+    if (result != nullptr)
+    {
+        delete result;
+    }
+    return result;
+}
+
+term_node* parser_impl::parse_term()
+{
+    term_node* result = nullptr;
+    if (this->m_scanner->get_token_type() == integer)
+    {
+        literal_node* literal_result = new literal_node();
+        this->m_scanner->scan();
+        return literal_result;
+    }
+    else if (this->m_scanner->get_token_type() == identifier)
+    {
+        char* identifier_name = this->m_scanner->get_token_string();
+        this->m_scanner->scan();
+        if (this->m_scanner->get_token_type() == left_bracket)
+        {
+            call_node* call_result = new call_node();
+            result = call_result;
+            call_result->function_name = identifier_name;
+            this->m_scanner->scan();
+            call_result->argument = this->parse_expression();
+            if (call_result->argument != nullptr)
+            {
+                if (this->m_scanner->get_token_type() == right_bracket)
+                {
+                    this->m_scanner->scan();
+                    return result;
+                }
+            }
+        }
+        else
+        {
+            identifier_node* identifier_result = new identifier_node();
+            identifier_result->identifier_name = identifier_name;
+            return identifier_result;
+        }
+    }
+
     if (result != nullptr)
     {
         delete result;
@@ -254,5 +300,37 @@ return_statement_node::~return_statement_node()
     if (this->value != nullptr)
     {
         delete this->value;
+    }
+}
+
+expression_node::~expression_node()
+{
+}
+
+term_node::~term_node()
+{
+}
+
+literal_node::~literal_node()
+{
+}
+
+identifier_node::~identifier_node()
+{
+    if (this->identifier_name != nullptr)
+    {
+        delete[] this->identifier_name;
+    }
+}
+
+call_node::~call_node()
+{
+    if (this->function_name != nullptr)
+    {
+        delete[] this->function_name;
+    }
+    if (this->argument)
+    {
+        delete this->argument;
     }
 }
