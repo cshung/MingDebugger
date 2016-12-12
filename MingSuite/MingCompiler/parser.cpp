@@ -159,7 +159,24 @@ expression_node* parser_impl::parse_expression()
 {
     expression_node* result = nullptr;
     term_node* term = this->parse_term();
-    // TODO: Handle sums here, how do I make sum nodes left associative here?
+    result = term;
+    if (term != nullptr)
+    {
+        while (this->m_scanner->get_token_type() == _plus)
+        {
+            this->m_scanner->scan();
+            term_node* right = this->parse_term();
+            if (right != nullptr)
+            {
+                plus_node* plus_result = new plus_node();
+                plus_result->left = left;
+                if (this->m_scanner->get_token_type() != _plus)
+                {
+                    plus_result->right = term;
+                }
+            }
+        }
+    }
     if (result != nullptr)
     {
         delete result;
@@ -332,5 +349,17 @@ call_node::~call_node()
     if (this->argument)
     {
         delete this->argument;
+    }
+}
+
+plus_node::~plus_node()
+{
+    if (this->left)
+    {
+        delete this->left;
+    }
+    if (this->right)
+    {
+        delete this->right;
     }
 }

@@ -80,6 +80,13 @@ struct call_node : public term_node
     expression_node* argument;
 };
 
+struct plus_node : public expression_node
+{
+    virtual ~plus_node();
+    expression_node* left;
+    term_node* right;
+};
+
 class parser
 {
 public:
