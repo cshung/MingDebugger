@@ -13,7 +13,7 @@ private:
     statement_node* parse_statement();
     condition_node* parse_condition();
     expression_node* parse_expression();
-	expression_node* parse_expression_suffix(expression_node* prefix);
+    expression_node* parse_expression_suffix(expression_node* prefix);
     term_node* parse_term();
 };
 
@@ -40,37 +40,37 @@ program_node* parser_impl::parse()
 program_node* parser_impl::parse_program()
 {
     program_node* result = new program_node();
-	result->function = parse_function();
-	function_node* last_function = result->function;
-	if (last_function != nullptr)
-	{
-		while (this->m_scanner->get_token_type() == function)
-		{
-			function_node* other = parse_function();
-			if (other == nullptr)
-			{
-				if (result != nullptr)
-				{
-					delete result;
-				}
-				return nullptr;
-			}
-			else
-			{
-				last_function->next_function = other;
-				last_function = other;
-			}
-		}
-		if (this->m_scanner->get_token_type() == eof)
-		{
-			return result;
-		}
-	}
-	if (result != nullptr)
-	{
-		delete result;
-	}
-	return nullptr;
+    result->function = parse_function();
+    function_node* last_function = result->function;
+    if (last_function != nullptr)
+    {
+        while (this->m_scanner->get_token_type() == function)
+        {
+            function_node* other = parse_function();
+            if (other == nullptr)
+            {
+                if (result != nullptr)
+                {
+                    delete result;
+                }
+                return nullptr;
+            }
+            else
+            {
+                last_function->next_function = other;
+                last_function = other;
+            }
+        }
+        if (this->m_scanner->get_token_type() == eof)
+        {
+            return result;
+        }
+    }
+    if (result != nullptr)
+    {
+        delete result;
+    }
+    return nullptr;
 }
 
 function_node* parser_impl::parse_function()
@@ -108,23 +108,23 @@ function_node* parser_impl::parse_function()
                         }
                     }
                 }
-				else if (this->m_scanner->get_token_type() == right_bracket)
-				{
-					this->m_scanner->scan();
-					if (this->m_scanner->get_token_type() == left_brace)
-					{
-						this->m_scanner->scan();
-						result->statement = this->parse_statement();
-						if (result->statement != nullptr)
-						{
-							if (this->m_scanner->get_token_type() == right_brace)
-							{
-								this->m_scanner->scan();
-								return result;
-							}
-						}
-					}
-				}
+                else if (this->m_scanner->get_token_type() == right_bracket)
+                {
+                    this->m_scanner->scan();
+                    if (this->m_scanner->get_token_type() == left_brace)
+                    {
+                        this->m_scanner->scan();
+                        result->statement = this->parse_statement();
+                        if (result->statement != nullptr)
+                        {
+                            if (this->m_scanner->get_token_type() == right_brace)
+                            {
+                                this->m_scanner->scan();
+                                return result;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -161,19 +161,19 @@ statement_node* parser_impl::parse_statement()
                                 if (this->m_scanner->get_token_type() == _else)
                                 {
                                     this->m_scanner->scan();
-									if (this->m_scanner->get_token_type() == left_brace)
-									{
-										this->m_scanner->scan();
-										if_result->false_statement = parse_statement();
-										if (if_result->false_statement != nullptr)
-										{
-											if (this->m_scanner->get_token_type() == right_brace)
-											{
-												this->m_scanner->scan();
-												return if_result;
-											}
-										}
-									}
+                                    if (this->m_scanner->get_token_type() == left_brace)
+                                    {
+                                        this->m_scanner->scan();
+                                        if_result->false_statement = parse_statement();
+                                        if (if_result->false_statement != nullptr)
+                                        {
+                                            if (this->m_scanner->get_token_type() == right_brace)
+                                            {
+                                                this->m_scanner->scan();
+                                                return if_result;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -197,30 +197,30 @@ statement_node* parser_impl::parse_statement()
             }
         }
     }
-	else if (this->m_scanner->get_token_type() == identifier)
-	{
-		call_statement_node* call_result = new call_statement_node();
-		result = call_result;
-		call_result->function_name = this->m_scanner->get_token_string();
-		this->m_scanner->scan();
-		if (this->m_scanner->get_token_type() == left_bracket)
-		{
-			this->m_scanner->scan();
-			call_result->argument = parse_expression();
-			if (call_result->argument != nullptr)
-			{
-				if (this->m_scanner->get_token_type() == right_bracket)
-				{
-					this->m_scanner->scan();
-					if (this->m_scanner->get_token_type() == semi_colon)
-					{
-						this->m_scanner->scan();
-						return result;
-					}
-				}
-			}
-		}
-	}
+    else if (this->m_scanner->get_token_type() == identifier)
+    {
+        call_statement_node* call_result = new call_statement_node();
+        result = call_result;
+        call_result->function_name = this->m_scanner->get_token_string();
+        this->m_scanner->scan();
+        if (this->m_scanner->get_token_type() == left_bracket)
+        {
+            this->m_scanner->scan();
+            call_result->argument = parse_expression();
+            if (call_result->argument != nullptr)
+            {
+                if (this->m_scanner->get_token_type() == right_bracket)
+                {
+                    this->m_scanner->scan();
+                    if (this->m_scanner->get_token_type() == semi_colon)
+                    {
+                        this->m_scanner->scan();
+                        return result;
+                    }
+                }
+            }
+        }
+    }
     if (result != nullptr)
     {
         delete result;
@@ -235,18 +235,18 @@ expression_node* parser_impl::parse_expression()
     result = term;
     if (term != nullptr)
     {
-		if (this->m_scanner->get_token_type() == _plus)
-		{
-			return this->parse_expression_suffix(term);
-		}
-		else if (this->m_scanner->get_token_type() == _minus)
-		{
-			return this->parse_expression_suffix(term);
-		}
-		else
-		{
-			return result;
-		}
+        if (this->m_scanner->get_token_type() == _plus)
+        {
+            return this->parse_expression_suffix(term);
+        }
+        else if (this->m_scanner->get_token_type() == _minus)
+        {
+            return this->parse_expression_suffix(term);
+        }
+        else
+        {
+            return result;
+        }
     }
     if (result != nullptr)
     {
@@ -257,59 +257,59 @@ expression_node* parser_impl::parse_expression()
 
 expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
 {
-	expression_node* result = nullptr;
-	if (this->m_scanner->get_token_type() == _plus)
-	{
-		plus_node* plus_result = new plus_node();
-		result = plus_result;
-		plus_result->left = prefix;
-		this->m_scanner->scan();
-		plus_result->right = this->parse_term();
-		if (plus_result->right != nullptr)
-		{
-			if (this->m_scanner->get_token_type() == _plus)
-			{
-				return this->parse_expression_suffix(result);
-			}
-			else if (this->m_scanner->get_token_type() == _minus)
-			{
-				return this->parse_expression_suffix(result);
-			}
-			else
-			{
-				return result;
-			}
-		}
-	}
-	else if (this->m_scanner->get_token_type() == _minus)
-	{
-		minus_node* minus_result = new minus_node();
-		result = minus_result;
-		minus_result->left = prefix;
-		this->m_scanner->scan();
-		minus_result->right = this->parse_term();
-		if (minus_result->right != nullptr)
-		{
-			if (this->m_scanner->get_token_type() == _plus)
-			{
-				return this->parse_expression_suffix(result);
-			}
-			else if (this->m_scanner->get_token_type() == _minus)
-			{
-				return this->parse_expression_suffix(result);
-			}
-			else
-			{
-				return result;
-			}
-		}
-	}
+    expression_node* result = nullptr;
+    if (this->m_scanner->get_token_type() == _plus)
+    {
+        plus_node* plus_result = new plus_node();
+        result = plus_result;
+        plus_result->left = prefix;
+        this->m_scanner->scan();
+        plus_result->right = this->parse_term();
+        if (plus_result->right != nullptr)
+        {
+            if (this->m_scanner->get_token_type() == _plus)
+            {
+                return this->parse_expression_suffix(result);
+            }
+            else if (this->m_scanner->get_token_type() == _minus)
+            {
+                return this->parse_expression_suffix(result);
+            }
+            else
+            {
+                return result;
+            }
+        }
+    }
+    else if (this->m_scanner->get_token_type() == _minus)
+    {
+        minus_node* minus_result = new minus_node();
+        result = minus_result;
+        minus_result->left = prefix;
+        this->m_scanner->scan();
+        minus_result->right = this->parse_term();
+        if (minus_result->right != nullptr)
+        {
+            if (this->m_scanner->get_token_type() == _plus)
+            {
+                return this->parse_expression_suffix(result);
+            }
+            else if (this->m_scanner->get_token_type() == _minus)
+            {
+                return this->parse_expression_suffix(result);
+            }
+            else
+            {
+                return result;
+            }
+        }
+    }
 
-	if (result != nullptr)
-	{
-		delete result;
-	}
-	return result;
+    if (result != nullptr)
+    {
+        delete result;
+    }
+    return result;
 }
 
 
@@ -319,7 +319,7 @@ term_node* parser_impl::parse_term()
     if (this->m_scanner->get_token_type() == integer)
     {
         literal_node* literal_result = new literal_node();
-		literal_result->value = this->m_scanner->get_token_integer_value();
+        literal_result->value = this->m_scanner->get_token_integer_value();
         this->m_scanner->scan();
         return literal_result;
     }
@@ -386,17 +386,17 @@ condition_node* parser_impl::parse_condition()
 
 program_node::~program_node()
 {
-	if (this->function != nullptr)
-	{
-		delete this->function;
-	}
+    if (this->function != nullptr)
+    {
+        delete this->function;
+    }
 }
 
 function_node::function_node()
 {
     this->function_name = nullptr;
-	this->argument_name = nullptr;
-	this->next_function = nullptr;
+    this->argument_name = nullptr;
+    this->next_function = nullptr;
 }
 
 function_node::~function_node()
@@ -409,10 +409,10 @@ function_node::~function_node()
     {
         delete[] argument_name;
     }
-	if (this->next_function != nullptr)
-	{
-		delete this->next_function;
-	}
+    if (this->next_function != nullptr)
+    {
+        delete this->next_function;
+    }
 }
 
 statement_node::~statement_node()
@@ -445,25 +445,25 @@ if_statement_node::~if_statement_node()
 
 call_statement_node::call_statement_node()
 {
-	this->function_name = nullptr;
-	this->argument = nullptr;
+    this->function_name = nullptr;
+    this->argument = nullptr;
 }
 
 call_statement_node::~call_statement_node()
 {
-	if (this->function_name != nullptr)
-	{
-		delete[] this->function_name;
-	}
-	if (this->argument != nullptr)
-	{
-		delete this->argument;
-	}
+    if (this->function_name != nullptr)
+    {
+        delete[] this->function_name;
+    }
+    if (this->argument != nullptr)
+    {
+        delete this->argument;
+    }
 }
 
 condition_node::condition_node()
 {
-	this->variable_name = nullptr;
+    this->variable_name = nullptr;
 }
 
 condition_node::~condition_node()
@@ -501,7 +501,7 @@ literal_node::~literal_node()
 
 identifier_node::identifier_node()
 {
-	this->identifier_name = nullptr;
+    this->identifier_name = nullptr;
 }
 
 identifier_node::~identifier_node()
@@ -514,8 +514,8 @@ identifier_node::~identifier_node()
 
 call_node::call_node()
 {
-	this->function_name = nullptr;
-	this->argument = nullptr;
+    this->function_name = nullptr;
+    this->argument = nullptr;
 }
 
 call_node::~call_node()
@@ -532,8 +532,8 @@ call_node::~call_node()
 
 plus_node::plus_node()
 {
-	this->left = nullptr;
-	this->right = nullptr;
+    this->left = nullptr;
+    this->right = nullptr;
 }
 
 plus_node::~plus_node()
@@ -550,18 +550,18 @@ plus_node::~plus_node()
 
 minus_node::minus_node()
 {
-	this->left = nullptr;
-	this->right = nullptr;
+    this->left = nullptr;
+    this->right = nullptr;
 }
 
 minus_node::~minus_node()
 {
-	if (this->left)
-	{
-		delete this->left;
-	}
-	if (this->right)
-	{
-		delete this->right;
-	}
+    if (this->left)
+    {
+        delete this->left;
+    }
+    if (this->right)
+    {
+        delete this->right;
+    }
 }

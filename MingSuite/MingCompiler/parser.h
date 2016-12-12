@@ -12,8 +12,8 @@ class parser_impl;
 
 struct program_node
 {
-	~program_node();
-	function_node* function;
+    ~program_node();
+    function_node* function;
 };
 
 struct function_node
@@ -23,7 +23,7 @@ struct function_node
     char* function_name;
     char* argument_name;
     statement_node* statement;
-	function_node* next_function;
+    function_node* next_function;
 };
 
 struct statement_node
@@ -49,15 +49,15 @@ struct return_statement_node : public statement_node
 
 struct call_statement_node : public statement_node
 {
-	call_statement_node();
-	~call_statement_node();
-	char* function_name;
-	expression_node* argument;
+    call_statement_node();
+    ~call_statement_node();
+    char* function_name;
+    expression_node* argument;
 };
 
 struct condition_node
 {
-	condition_node();
+    condition_node();
     ~condition_node();
     char* variable_name;
     int value;
@@ -81,14 +81,14 @@ struct literal_node : public term_node
 
 struct identifier_node : public term_node
 {
-	identifier_node();
+    identifier_node();
     virtual ~identifier_node();
     char* identifier_name;
 };
 
 struct call_node : public term_node
 {
-	call_node();
+    call_node();
     virtual ~call_node();
     char* function_name;
     expression_node* argument;
@@ -96,7 +96,7 @@ struct call_node : public term_node
 
 struct plus_node : public expression_node
 {
-	plus_node();
+    plus_node();
     virtual ~plus_node();
     expression_node* left;
     term_node* right;
@@ -104,10 +104,10 @@ struct plus_node : public expression_node
 
 struct minus_node : public expression_node
 {
-	minus_node();
-	virtual ~minus_node();
-	expression_node* left;
-	term_node* right;
+    minus_node();
+    virtual ~minus_node();
+    expression_node* left;
+    term_node* right;
 };
 
 class parser
