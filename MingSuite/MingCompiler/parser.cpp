@@ -84,7 +84,6 @@ function_node* parser_impl::parse_function()
             if (this->m_scanner->get_token_type() == left_bracket)
             {
                 this->m_scanner->scan();
-				// TODO, main function does not have an argument!
                 if (this->m_scanner->get_token_type() == identifier)
                 {
                     result->argument_name = this->m_scanner->get_token_string();
@@ -107,6 +106,23 @@ function_node* parser_impl::parse_function()
                         }
                     }
                 }
+				else if (this->m_scanner->get_token_type() == right_bracket)
+				{
+					this->m_scanner->scan();
+					if (this->m_scanner->get_token_type() == left_brace)
+					{
+						this->m_scanner->scan();
+						result->statement = this->parse_statement();
+						if (result->statement != nullptr)
+						{
+							if (this->m_scanner->get_token_type() == right_brace)
+							{
+								this->m_scanner->scan();
+								return result;
+							}
+						}
+					}
+				}
             }
         }
     }
@@ -179,6 +195,30 @@ statement_node* parser_impl::parse_statement()
             }
         }
     }
+	else if (this->m_scanner->get_token_type() == identifier)
+	{
+		call_statement_node* call_result = new call_statement_node();
+		result = call_result;
+		call_result->function_name = this->m_scanner->get_token_string();
+		this->m_scanner->scan();
+		if (this->m_scanner->get_token_type() == left_bracket)
+		{
+			this->m_scanner->scan();
+			call_result->argument = parse_expression();
+			if (call_result->argument != nullptr)
+			{
+				if (this->m_scanner->get_token_type() == right_bracket)
+				{
+					this->m_scanner->scan();
+					if (this->m_scanner->get_token_type() == semi_colon)
+					{
+						this->m_scanner->scan();
+						return result;
+					}
+				}
+			}
+		}
+	}
     if (result != nullptr)
     {
         delete result;
@@ -399,6 +439,24 @@ if_statement_node::~if_statement_node()
     {
         delete this->false_statement;
     }
+}
+
+call_statement_node::call_statement_node()
+{
+	this->function_name = nullptr;
+	this->argument = nullptr;
+}
+
+call_statement_node::~call_statement_node()
+{
+	if (this->function_name != nullptr)
+	{
+		delete[] this->function_name;
+	}
+	if (this->argument != nullptr)
+	{
+		delete this->argument;
+	}
 }
 
 condition_node::condition_node()

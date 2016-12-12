@@ -47,6 +47,14 @@ struct return_statement_node : public statement_node
     expression_node* value;
 };
 
+struct call_statement_node : public statement_node
+{
+	call_statement_node();
+	~call_statement_node();
+	char* function_name;
+	expression_node* argument;
+};
+
 struct condition_node
 {
 	condition_node();
