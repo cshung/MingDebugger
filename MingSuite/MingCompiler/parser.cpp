@@ -40,9 +40,35 @@ program_node* parser_impl::parse()
 program_node* parser_impl::parse_program()
 {
     program_node* result = new program_node();
-    result->function = parse_function();
-    // TODO: Parse more functions
-    return result;
+	function_node* last_function = parse_function();
+	if (last_function != nullptr)
+	{
+		while (this->m_scanner->get_token_type() == function)
+		{
+			function_node* other = parse_function();
+			if (other == nullptr)
+			{
+				if (result != nullptr)
+				{
+					delete result;
+				}
+				return nullptr;
+			}
+			else
+			{
+				last_function->next_function = other;
+			}
+		}
+		if (this->m_scanner->get_token_type() == eof)
+		{
+			return result;
+		}
+	}
+	if (result != nullptr)
+	{
+		delete result;
+	}
+	return nullptr;
 }
 
 function_node* parser_impl::parse_function()
@@ -58,6 +84,7 @@ function_node* parser_impl::parse_function()
             if (this->m_scanner->get_token_type() == left_bracket)
             {
                 this->m_scanner->scan();
+				// TODO, main function does not have an argument!
                 if (this->m_scanner->get_token_type() == identifier)
                 {
                     result->argument_name = this->m_scanner->get_token_string();
@@ -326,6 +353,8 @@ program_node::~program_node()
 function_node::function_node()
 {
     this->function_name = nullptr;
+	this->argument_name = nullptr;
+	this->next_function = nullptr;
 }
 
 function_node::~function_node()
@@ -338,6 +367,10 @@ function_node::~function_node()
     {
         delete[] argument_name;
     }
+	if (this->next_function != nullptr)
+	{
+		delete this->next_function;
+	}
 }
 
 statement_node::~statement_node()
@@ -366,6 +399,11 @@ if_statement_node::~if_statement_node()
     {
         delete this->false_statement;
     }
+}
+
+condition_node::condition_node()
+{
+	this->variable_name = nullptr;
 }
 
 condition_node::~condition_node()
@@ -401,12 +439,23 @@ literal_node::~literal_node()
 {
 }
 
+identifier_node::identifier_node()
+{
+	this->identifier_name = nullptr;
+}
+
 identifier_node::~identifier_node()
 {
     if (this->identifier_name != nullptr)
     {
         delete[] this->identifier_name;
     }
+}
+
+call_node::call_node()
+{
+	this->function_name = nullptr;
+	this->argument = nullptr;
 }
 
 call_node::~call_node()
@@ -421,6 +470,12 @@ call_node::~call_node()
     }
 }
 
+plus_node::plus_node()
+{
+	this->left = nullptr;
+	this->right = nullptr;
+}
+
 plus_node::~plus_node()
 {
     if (this->left)
@@ -431,6 +486,12 @@ plus_node::~plus_node()
     {
         delete this->right;
     }
+}
+
+minus_node::minus_node()
+{
+	this->left = nullptr;
+	this->right = nullptr;
 }
 
 minus_node::~minus_node()
