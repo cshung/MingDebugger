@@ -2,6 +2,7 @@
 
 #include "scanner.h"
 #include "parser.h"
+#include "code_generator.h"
 
 #include <iostream>
 using namespace std;
@@ -46,5 +47,9 @@ void compiler_impl::compile()
     scanner s(this->source_file);
     parser p(&s);
     program_node* program = p.parse();
-    cout << program << endl;
+    if (program != nullptr)
+    {
+        code_generator c;
+        c.generate_code(program);
+    }
 }
