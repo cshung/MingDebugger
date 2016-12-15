@@ -8,7 +8,15 @@ struct instruction
 {
     instruction();
     virtual ~instruction();
+    instruction* prev;
     instruction* next;
+};
+
+struct instruction_sequence
+{
+    instruction_sequence();
+    instruction* head;
+    instruction* tail;
 };
 
 struct label_instruction : instruction
@@ -21,7 +29,7 @@ class code_generator
 public:
     code_generator();
     ~code_generator();
-    instruction* generate_code(program_node* program);
+    instruction_sequence generate_code(program_node* program);
 private:
     code_generator_impl* impl;
 };
