@@ -1,28 +1,9 @@
 #pragma once
 
 #include "nodes.h"
+#include "instructions.h"
 
 class code_generator_impl;
-
-struct instruction
-{
-    instruction();
-    virtual ~instruction();
-    instruction* prev;
-    instruction* next;
-};
-
-struct instruction_sequence
-{
-    instruction_sequence();
-    instruction* head;
-    instruction* tail;
-};
-
-struct label_instruction : instruction
-{
-    virtual ~label_instruction();
-};
 
 class code_generator
 {

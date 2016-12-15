@@ -8,6 +8,7 @@ struct code_generation_context
     code_generation_context();
     ~code_generation_context();
     unordered_map<string, instruction_sequence> functions;
+    unordered_map<string, int> variables;
     label_instruction* epilog_label;
     int tempUsed;
     int expressionTarget;
@@ -72,6 +73,7 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
     {
         instruction_sequence function_body = this->generate_code(function, context);
         context->functions.insert(make_pair(function->function_name, function_body));
+        function = function->next_function;
     }
 
     // TODO: Layout and linking
@@ -84,6 +86,11 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     label_instruction* epilog_label = new label_instruction();
     context->epilog_label = epilog_label;
     context->tempUsed = 0;
+    if (function->argument_name != nullptr)
+    {
+        /* The stack pointer is pointing at empty, before it is the return address, before it is the argument! */
+        context->variables.insert(make_pair(function->argument_name, -2)); 
+    }
     instruction_sequence statement_body = generate_code(function->statement, context);
 
     // TODO: Generate prolog and epilog
@@ -186,6 +193,38 @@ instruction_sequence code_generator_impl::generate_code(minus_node* minus, code_
 instruction_sequence code_generator_impl::generate_code(condition_node* condition, code_generation_context* context)
 {
     instruction_sequence result;
+    int variable_location = context->variables[condition->variable_name];
+    int literal = condition->value;
+    // load r3, variable_location
+    load_instruction* load_variable = new load_instruction();
+    load_variable->destination_register = 3;
+    load_variable->location = variable_location;
+    
+    // load r4, literal_location
+    load_immediate_instruction* load_literal = new load_immediate_instruction();
+    load_literal->destination_register = 4;
+    load_literal->value = literal;
+
+    // cmp r2, r3, r4
+    compare_instruction* compare = new compare_instruction();
+    compare->destination_register = 2;
+    compare->operand1 = 3;
+    compare->operand2 = 4;
+
+    // store target, r2
+    store_instruction* store = new store_instruction();
+    store->location = context->expressionTarget;
+    store->source_register = 2;
+
+    result.head = load_variable;
+    load_variable->next = load_literal;
+    load_literal->prev = load_variable;
+    load_literal->next = compare;
+    compare->prev = load_literal;
+    compare->next = store;
+    store->prev = compare;
+    result.tail = store;
+
     return result;
 }
 
@@ -201,23 +240,4 @@ code_generation_context::~code_generation_context()
     {
         delete this->epilog_label;
     }
-}
-
-instruction::instruction()
-{
-    this->next = nullptr;
-}
-
-instruction::~instruction()
-{
-}
-
-instruction_sequence::instruction_sequence()
-{
-    this->head = nullptr;
-    this->tail = nullptr;
-}
-
-label_instruction::~label_instruction()
-{
 }

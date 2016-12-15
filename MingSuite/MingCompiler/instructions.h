@@ -1,0 +1,50 @@
+#pragma once
+
+struct instruction
+{
+    instruction();
+    virtual ~instruction();
+    instruction* prev;
+    instruction* next;
+};
+
+struct instruction_sequence
+{
+    instruction_sequence();
+    instruction* head;
+    instruction* tail;
+};
+
+struct label_instruction : instruction
+{
+    virtual ~label_instruction();
+};
+
+struct load_instruction : instruction
+{
+    virtual ~load_instruction();
+    int destination_register;
+    int location;
+};
+
+struct load_immediate_instruction : instruction
+{
+    virtual ~load_immediate_instruction();
+    int destination_register;
+    int value;
+};
+
+struct compare_instruction : instruction
+{
+    virtual ~compare_instruction();
+    int destination_register;
+    int operand1;
+    int operand2;
+};
+
+struct store_instruction : instruction
+{
+    ~store_instruction();
+    int location;
+    int source_register;
+};
