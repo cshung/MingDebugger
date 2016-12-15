@@ -59,6 +59,11 @@ if_statement_node::~if_statement_node()
     }
 }
 
+statement_node_type if_statement_node::get_statement_node_type()
+{
+    return if_statement;
+}
+
 call_statement_node::call_statement_node()
 {
     this->function_name = nullptr;
@@ -75,6 +80,11 @@ call_statement_node::~call_statement_node()
     {
         delete this->argument;
     }
+}
+
+statement_node_type call_statement_node::get_statement_node_type()
+{
+    return call_statement;
 }
 
 condition_node::condition_node()
@@ -103,6 +113,11 @@ return_statement_node::~return_statement_node()
     }
 }
 
+statement_node_type return_statement_node::get_statement_node_type()
+{
+    return return_statement;
+}
+
 expression_node::~expression_node()
 {
 }
@@ -113,6 +128,11 @@ term_node::~term_node()
 
 literal_node::~literal_node()
 {
+}
+
+expression_node_type literal_node::get_expression_node_type()
+{
+    return literal;
 }
 
 identifier_node::identifier_node()
@@ -126,6 +146,11 @@ identifier_node::~identifier_node()
     {
         delete[] this->identifier_name;
     }
+}
+
+expression_node_type identifier_node::get_expression_node_type()
+{
+    return variable;
 }
 
 call_node::call_node()
@@ -146,6 +171,11 @@ call_node::~call_node()
     }
 }
 
+expression_node_type call_node::get_expression_node_type()
+{
+    return call;
+}
+
 plus_node::plus_node()
 {
     this->left = nullptr;
@@ -164,6 +194,11 @@ plus_node::~plus_node()
     }
 }
 
+expression_node_type plus_node::get_expression_node_type()
+{
+    return plus_node_type;
+}
+
 minus_node::minus_node()
 {
     this->left = nullptr;
@@ -180,4 +215,9 @@ minus_node::~minus_node()
     {
         delete this->right;
     }
+}
+
+expression_node_type minus_node::get_expression_node_type()
+{
+    return minus_node_type;
 }
