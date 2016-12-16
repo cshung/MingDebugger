@@ -19,9 +19,9 @@ class code_generator_impl
 public:
     code_generator_impl();
     ~code_generator_impl();
-    instruction_sequence generate_code(program_node* program);
+    code_generation_outputs generate_code(program_node* program);
 private:
-    instruction_sequence generate_code(program_node* program, code_generation_context* context);
+    code_generation_outputs generate_code(program_node* program, code_generation_context* context);
     instruction_sequence generate_code(function_node* function, code_generation_context* context);
     instruction_sequence generate_code(statement_node* statement, code_generation_context* context);
     instruction_sequence generate_code(if_statement_node* if_statement, code_generation_context* context);
@@ -70,7 +70,7 @@ code_generator::~code_generator()
     delete this->impl;
 }
 
-instruction_sequence code_generator::generate_code(program_node* program)
+code_generation_outputs code_generator::generate_code(program_node* program)
 {
     return this->impl->generate_code(program);
 }
@@ -83,13 +83,13 @@ code_generator_impl::~code_generator_impl()
 {
 }
 
-instruction_sequence code_generator_impl::generate_code(program_node* program)
+code_generation_outputs code_generator_impl::generate_code(program_node* program)
 {
     code_generation_context context;
     return this->generate_code(program, &context);
 }
 
-instruction_sequence code_generator_impl::generate_code(program_node* program, code_generation_context* context)
+code_generation_outputs code_generator_impl::generate_code(program_node* program, code_generation_context* context)
 {
     instruction_sequence result;
 
@@ -141,7 +141,12 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
     result.head->prev = nullptr;
     result.tail->next = nullptr;
 
-    return result;
+    code_generation_outputs output;
+
+    output.instructions = result;
+    output.entry_point = context->function_labels["main"]->address;
+
+    return output;
 }
 
 instruction_sequence code_generator_impl::generate_code(function_node* function, code_generation_context* context)

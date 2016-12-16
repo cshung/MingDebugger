@@ -4,6 +4,9 @@
 #include "parser.h"
 #include "code_generator.h"
 
+// TODO: Remove me!
+#include "virtual_machine.h"
+
 #include <iostream>
 using namespace std;
 
@@ -50,6 +53,9 @@ void compiler_impl::compile()
     if (program != nullptr)
     {
         code_generator c;
-        c.generate_code(program);
+        code_generation_outputs binaries = c.generate_code(program);
+        // TODO: Save the binaries
+        virtual_machine vm;
+        vm.run(binaries.instructions, binaries.entry_point);
     }
 }
