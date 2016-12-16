@@ -98,6 +98,7 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
     {
         label_instruction* label = new label_instruction();
         context->function_labels.insert(make_pair(function->function_name, label));
+        function = function->next_function;
     }
     function = program->function;
     while (function != nullptr)
