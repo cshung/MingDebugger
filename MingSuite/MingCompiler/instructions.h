@@ -83,3 +83,8 @@ struct call_instruction : instruction
     virtual ~call_instruction();
     label_instruction* target;
 };
+
+struct return_instruction : instruction
+{
+    virtual ~return_instruction();
+};

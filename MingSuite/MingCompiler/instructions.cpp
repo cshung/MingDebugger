@@ -54,3 +54,8 @@ minus_instruction::~minus_instruction()
 call_instruction::~call_instruction()
 {
 }
+
+return_instruction::~return_instruction()
+{
+}
+

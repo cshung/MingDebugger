@@ -118,14 +118,34 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     label_instruction* epilog_label = new label_instruction();
     context->epilog_label = epilog_label;
     context->tempUsed = 0;
+    store_instruction* store_argument = nullptr;
     if (function->argument_name != nullptr)
     {
-        /* The stack pointer is pointing at empty, before it is the return address, before it is the argument! */
-        context->variables.insert(make_pair(function->argument_name, -2));
+        int argument_location = context->tempUsed;
+        store_argument = new store_instruction();
+        store_argument->source_register = 1;
+        store_argument->location = argument_location;
+        context->variables.insert(make_pair(function->argument_name, argument_location));
     }
     instruction_sequence statement_body = generate_code(function->statement, context);
 
-    // TODO: Generate prolog and epilog
+    return_instruction* return_op = new return_instruction();
+
+
+    if (store_argument == nullptr)
+    {
+        result.head = statement_body.head;
+    }
+    else
+    {
+        result.head = store_argument;
+        concatenate(store_argument, statement_body);
+    }
+    concatenate(statement_body, epilog_label);
+    // TODO: Adjust stack space
+    concatenate(epilog_label, return_op);
+    result.tail = return_op;
+
     return result;
 }
 
@@ -217,6 +237,16 @@ instruction_sequence code_generator_impl::generate_code(return_statement_node* r
 instruction_sequence code_generator_impl::generate_code(call_statement_node* call_statement, code_generation_context* context)
 {
     instruction_sequence result;
+    int argumentTarget = ++context->tempUsed;
+    context->expressionTarget = argumentTarget;
+    instruction_sequence argument_code = this->generate_code(call_statement->argument, context);
+    call_instruction* call_op = new call_instruction();
+    call_op->target = context->function_labels[call_statement->function_name];
+
+    result.head = argument_code.head;
+    concatenate(argument_code, call_op);
+    result.tail = call_op;
+
     return result;
 }
 
@@ -262,6 +292,17 @@ instruction_sequence code_generator_impl::generate_code(literal_node* literal, c
 instruction_sequence code_generator_impl::generate_code(identifier_node* variable, code_generation_context* context)
 {
     instruction_sequence result;
+    load_instruction* load = new load_instruction();
+    load->location = context->variables[variable->identifier_name];
+    load->destination_register = 3;
+    store_instruction* store = new store_instruction();
+    store->source_register = 3;
+    store->location = context->expressionTarget;
+    
+    result.head = load;
+    concatenate(load, store);
+    result.tail = store;
+
     return result;
 }
 
