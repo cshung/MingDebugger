@@ -57,6 +57,7 @@ void compiler_impl::compile()
         // TODO: Save the binaries
         virtual_machine vm;
         debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
+        debugger->create_address_breakpoint(0);
         debugger->resume();
     }
 }

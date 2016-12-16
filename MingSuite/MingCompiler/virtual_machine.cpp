@@ -10,6 +10,8 @@ public:
     void run(instruction_sequence instructions, int entry_point);
     debugger* debug(instruction_sequence instructions, int entry_point);
     virtual void resume();
+    virtual instruction* get_instruction(int address);
+    virtual void set_instruction(int address, instruction* instruction);
 private:
     void setup(instruction_sequence instructions, int entry_point);
     void execute(instruction* instruction);
@@ -111,6 +113,19 @@ void virtual_machine_impl::resume()
         cout << "IP = " << this->ip << endl;
         */
     }
+    if (this->in_break_state)
+    {
+        this->m_debugger->on_breakpoint(this->ip);
+    }
+}
+instruction* virtual_machine_impl::get_instruction(int address)
+{
+    return this->code_memory[address];
+}
+
+void virtual_machine_impl::set_instruction(int address, instruction* instruction)
+{
+    this->code_memory[address] = instruction;
 }
 
 void virtual_machine_impl::execute(instruction* instruction)
@@ -157,7 +172,7 @@ void virtual_machine_impl::execute(instruction* instruction)
         execute((print_instruction*)instruction);
         break;
     case instruction_type::break_instruction_type:
-        execute((branch_instruction*)instruction);
+        execute((break_instruction*)instruction);
         break;
     }
     this->ip++;
