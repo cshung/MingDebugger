@@ -11,6 +11,11 @@ instruction::~instruction()
 {
 }
 
+bool instruction::is_label()
+{
+    return false;
+}
+
 instruction_sequence::instruction_sequence()
 {
     this->head = nullptr;
@@ -22,10 +27,22 @@ int label_instruction::label_counter = 0;
 label_instruction::label_instruction()
 {
     this->label_id = ++label_counter;
+    this->address = -1;
 }
 
 label_instruction::~label_instruction()
 {
+
+}
+
+bool label_instruction::is_label()
+{
+    return true;
+}
+
+void label_instruction::assign_address(int address)
+{
+    this->address = address;
 }
 
 void label_instruction::print()
@@ -75,7 +92,7 @@ branch_on_zero_instruction::~branch_on_zero_instruction()
 
 void branch_on_zero_instruction::print()
 {
-    cout << "branch to " << this->branchTo->label_id << " if R" << this->operand << " is 0" << endl;
+    cout << "branch to " << this->branchTo->address << " if R" << this->operand << " is 0" << endl;
 }
 
 branch_instruction::~branch_instruction()
@@ -84,7 +101,7 @@ branch_instruction::~branch_instruction()
 
 void branch_instruction::print()
 {
-    cout << "branch to " << this->branchTo->label_id << endl;
+    cout << "branch to " << this->branchTo->address << endl;
 }
 
 plus_instruction::~plus_instruction()
@@ -111,7 +128,7 @@ call_instruction::~call_instruction()
 
 void call_instruction::print()
 {
-    cout << "call " << this->target->label_id << endl;
+    cout << "call " << this->target->address << endl;
 }
 
 return_instruction::~return_instruction()

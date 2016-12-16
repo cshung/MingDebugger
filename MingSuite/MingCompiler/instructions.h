@@ -4,6 +4,7 @@ struct instruction
 {
     instruction();
     virtual ~instruction();
+    virtual bool is_label();
     instruction* prev;
     instruction* next;
 
@@ -23,6 +24,11 @@ struct label_instruction : instruction
     label_instruction();
     virtual ~label_instruction();
     int label_id;
+    int address;
+
+    virtual bool is_label();
+
+    virtual void assign_address(int address);
 
     virtual void print();
 };

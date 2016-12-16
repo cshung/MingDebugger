@@ -7,7 +7,6 @@ struct code_generation_context
 {
     code_generation_context();
     ~code_generation_context();
-    unordered_map<string, instruction_sequence> functions;
     unordered_map<string, label_instruction*> function_labels;
     unordered_map<string, int> variables;
     label_instruction* epilog_label;
@@ -93,6 +92,10 @@ instruction_sequence code_generator_impl::generate_code(program_node* program)
 instruction_sequence code_generator_impl::generate_code(program_node* program, code_generation_context* context)
 {
     instruction_sequence result;
+
+    label_instruction* begin_program = new label_instruction();
+    label_instruction* end_program = new label_instruction();
+
     function_node* function = program->function;
     while (function != nullptr)
     {
@@ -101,19 +104,42 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
         function = function->next_function;
     }
     function = program->function;
+
+    instruction* end = begin_program;
     while (function != nullptr)
     {
         instruction_sequence function_body = this->generate_code(function, context);
-        context->functions.insert(make_pair(function->function_name, function_body));
-        instruction* cursor = function_body.head;
-        while (cursor != nullptr)
-        {
-            cursor->print();
-            cursor = cursor->next;
-        }
+        concatenate(end, function_body);
+        end = function_body.tail;
         function = function->next_function;
     }
+    concatenate(end, end_program);
 
+    // Removing the labels and replacing them as addresses
+    instruction* cursor = begin_program->next;
+    int address = 0;
+    while (cursor != end_program)
+    {
+        if (cursor->is_label())
+        {
+            label_instruction* label = (label_instruction*)cursor;
+            label->assign_address(address);
+            cursor = cursor->next;
+            label->prev->next = label->next;
+            label->next->prev = label->prev;
+        }
+        else
+        {
+            cursor = cursor->next;
+            address++;
+        }
+    }
+
+    result.head = begin_program->next;
+    result.tail = end_program->prev;
+
+    result.head->prev = nullptr;
+    result.tail->next = nullptr;
 
     return result;
 }
@@ -161,7 +187,8 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
 
     concatenate(statement_body, epilog_label);
 
-    concatenate(epilog_label, return_op);
+    concatenate(epilog_label, pop);
+    concatenate(pop, return_op);
     result.tail = return_op;
 
     return result;
