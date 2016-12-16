@@ -61,3 +61,25 @@ struct branch_instruction : instruction
     ~branch_instruction();
     label_instruction* branchTo;
 };
+
+struct plus_instruction : instruction
+{
+    virtual ~plus_instruction();
+    int destination_register;
+    int operand1;
+    int operand2;
+};
+
+struct minus_instruction : instruction
+{
+    virtual ~minus_instruction();
+    int destination_register;
+    int operand1;
+    int operand2;
+};
+
+struct call_instruction : instruction
+{
+    virtual ~call_instruction();
+    label_instruction* target;
+};

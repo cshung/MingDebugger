@@ -42,3 +42,15 @@ branch_on_zero_instruction::~branch_on_zero_instruction()
 branch_instruction::~branch_instruction()
 {
 }
+
+plus_instruction::~plus_instruction()
+{
+}
+
+minus_instruction::~minus_instruction()
+{
+}
+
+call_instruction::~call_instruction()
+{
+}

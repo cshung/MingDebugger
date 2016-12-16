@@ -8,6 +8,7 @@ struct code_generation_context
     code_generation_context();
     ~code_generation_context();
     unordered_map<string, instruction_sequence> functions;
+    unordered_map<string, label_instruction*> function_labels;
     unordered_map<string, int> variables;
     label_instruction* epilog_label;
     int tempUsed;
@@ -54,6 +55,12 @@ void concatenate(instruction* prev, instruction_sequence next)
     next.head->prev = prev;
 }
 
+void concatenate(instruction_sequence prev, instruction_sequence next)
+{
+    prev.tail->next = next.head;
+    next.head->prev = prev.tail;
+}
+
 code_generator::code_generator()
 {
     this->impl = new code_generator_impl();
@@ -87,6 +94,12 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
 {
     instruction_sequence result;
     function_node* function = program->function;
+    while (function != nullptr)
+    {
+        label_instruction* label = new label_instruction();
+        context->function_labels.insert(make_pair(function->function_name, label));
+    }
+    function = program->function;
     while (function != nullptr)
     {
         instruction_sequence function_body = this->generate_code(function, context);
@@ -254,18 +267,91 @@ instruction_sequence code_generator_impl::generate_code(identifier_node* variabl
 instruction_sequence code_generator_impl::generate_code(call_node* call, code_generation_context* context)
 {
     instruction_sequence result;
+    int expressionTarget = context->expressionTarget;
+    int argumentTarget = ++context->tempUsed;
+    context->expressionTarget = argumentTarget;
+    instruction_sequence argument_code = this->generate_code(call->argument, context);
+    load_instruction* load_argument = new load_instruction();
+    load_argument->location = argumentTarget;
+    load_argument->destination_register = 1;
+    call_instruction* call_op = new call_instruction();
+    call_op->target = context->function_labels[call->function_name];
+    store_instruction* store = new store_instruction();
+    store->source_register = 2;
+    store->location = expressionTarget;
+
+    result.head = argument_code.head;
+    concatenate(argument_code, load_argument);
+    concatenate(load_argument, call_op);
+    concatenate(call_op, store);
+    result.tail = store;
+
     return result;
 }
 
 instruction_sequence code_generator_impl::generate_code(plus_node* plus, code_generation_context* context)
 {
     instruction_sequence result;
+    int expressionTarget = context->expressionTarget;
+    int left_target = ++context->tempUsed;
+    int right_target = ++context->tempUsed;
+    context->expressionTarget = left_target;
+    instruction_sequence left_code = this->generate_code(plus->left, context);
+    context->expressionTarget = right_target;
+    instruction_sequence right_code = this->generate_code(plus->left, context);
+    load_instruction* load_left = new load_instruction();
+    load_left->destination_register = 3;
+    load_left->location = left_target;
+    load_instruction* load_right = new load_instruction();
+    load_right->destination_register = 4;
+    load_right->location = right_target;
+    plus_instruction* plus_op = new plus_instruction();
+    plus_op->destination_register = 2;
+    plus_op->operand1 = 3;
+    plus_op->operand2 = 4;
+    store_instruction* store = new store_instruction();
+    store->source_register = 2;
+    store->location = expressionTarget;
+    result.head = left_code.head;
+    concatenate(left_code, right_code);
+    concatenate(right_code, load_left);
+    concatenate(load_left, load_right);
+    concatenate(load_right, plus_op);
+    concatenate(plus_op, store);
+    result.tail = store;
     return result;
 }
 
 instruction_sequence code_generator_impl::generate_code(minus_node* minus, code_generation_context* context)
 {
     instruction_sequence result;
+    int expressionTarget = context->expressionTarget;
+    int left_target = ++context->tempUsed;
+    int right_target = ++context->tempUsed;
+    context->expressionTarget = left_target;
+    instruction_sequence left_code = this->generate_code(minus->left, context);
+    context->expressionTarget = right_target;
+    instruction_sequence right_code = this->generate_code(minus->left, context);
+    load_instruction* load_left = new load_instruction();
+    load_left->destination_register = 3;
+    load_left->location = left_target;
+    load_instruction* load_right = new load_instruction();
+    load_right->destination_register = 4;
+    load_right->location = right_target;
+    minus_instruction* minus_op = new minus_instruction();
+    minus_op->destination_register = 2;
+    minus_op->operand1 = 3;
+    minus_op->operand2 = 4;
+    store_instruction* store = new store_instruction();
+    store->source_register = 2;
+    store->location = expressionTarget;
+    result.head = left_code.head;
+    concatenate(left_code, right_code);
+    concatenate(right_code, load_left);
+    concatenate(load_left, load_right);
+    concatenate(load_right, minus_op);
+    concatenate(minus_op, store);
+    result.tail = store;
     return result;
 }
 
