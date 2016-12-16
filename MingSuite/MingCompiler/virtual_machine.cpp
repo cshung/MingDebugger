@@ -3,11 +3,14 @@
 #include <iostream>
 using namespace std;
 
-class virtual_machine_impl
+class virtual_machine_impl : virtual_machine_debugging_interface
 {
 public:
     void run(instruction_sequence instructions, int entry_point);
+    debugger* debug(instruction_sequence instructions, int entry_point);
+    virtual void resume();
 private:
+    void setup(instruction_sequence instructions, int entry_point);
     void execute(instruction* instruction);
     void execute(load_instruction* instruction);
     void execute(load_immediate_instruction* instruction);
@@ -44,7 +47,12 @@ void virtual_machine::run(instruction_sequence instructions, int entry_point)
     this->impl->run(instructions, entry_point);
 }
 
-void virtual_machine_impl::run(instruction_sequence instructions, int entry_point)
+debugger* virtual_machine::debug(instruction_sequence instructions, int entry_point)
+{
+    return this->impl->debug(instructions, entry_point);
+}
+
+void virtual_machine_impl::setup(instruction_sequence instructions, int entry_point)
 {
     int stack_size = 10000;
     data_memory.resize(stack_size);
@@ -60,7 +68,22 @@ void virtual_machine_impl::run(instruction_sequence instructions, int entry_poin
     data_memory[sp] = -1;
     sp--;
     ip = entry_point;
+}
 
+void virtual_machine_impl::run(instruction_sequence instructions, int entry_point)
+{
+    this->setup(instructions, entry_point);
+    this->resume();
+}
+
+debugger* virtual_machine_impl::debug(instruction_sequence instructions, int entry_point)
+{
+    this->setup(instructions, entry_point);
+    return new debugger(this);
+}
+
+void virtual_machine_impl::resume()
+{
     while (this->ip != -1)
     {
         instruction* current = code_memory[this->ip];

@@ -145,6 +145,7 @@
     <ClCompile Include="argument_parser.cpp" />
     <ClCompile Include="code_generator.cpp" />
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="debugger.cpp" />
     <ClCompile Include="instructions.cpp" />
     <ClCompile Include="nodes.cpp" />
     <ClCompile Include="parser.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="argument_parser.h" />
     <ClInclude Include="code_generator.h" />
     <ClInclude Include="compiler.h" />
+    <ClInclude Include="debugger.h" />
     <ClInclude Include="instructions.h" />
     <ClInclude Include="nodes.h" />
     <ClInclude Include="parser.h" />

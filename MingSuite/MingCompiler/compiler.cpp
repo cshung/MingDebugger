@@ -56,6 +56,7 @@ void compiler_impl::compile()
         code_generation_outputs binaries = c.generate_code(program);
         // TODO: Save the binaries
         virtual_machine vm;
-        vm.run(binaries.instructions, binaries.entry_point);
+        debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
+        debugger->resume();
     }
 }
