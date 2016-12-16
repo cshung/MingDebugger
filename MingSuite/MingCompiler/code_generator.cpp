@@ -109,6 +109,7 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
         while (cursor != nullptr)
         {
             cursor->print();
+            cursor = cursor->next;
         }
         function = function->next_function;
     }
@@ -126,7 +127,7 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     store_instruction* store_argument = nullptr;
     if (function->argument_name != nullptr)
     {
-        int argument_location = context->tempUsed;
+        int argument_location = ++context->tempUsed;
         store_argument = new store_instruction();
         store_argument->source_register = 1;
         store_argument->location = argument_location;
@@ -142,7 +143,11 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
 
     return_instruction* return_op = new return_instruction();
 
-    result.head = push;
+    label_instruction* function_label = context->function_labels[function->function_name];
+
+    result.head = function_label;
+
+    concatenate(function_label, push);
 
     if (store_argument == nullptr)
     {
@@ -182,6 +187,7 @@ instruction_sequence code_generator_impl::generate_code(if_statement_node* if_st
 {
     instruction_sequence result;
     int condition_target = ++context->tempUsed;
+    context->expressionTarget = condition_target;
     instruction_sequence condition_code = this->generate_code(if_statement->condition, context);
 
     label_instruction* false_label = new label_instruction();
@@ -253,12 +259,26 @@ instruction_sequence code_generator_impl::generate_code(call_statement_node* cal
     int argumentTarget = ++context->tempUsed;
     context->expressionTarget = argumentTarget;
     instruction_sequence argument_code = this->generate_code(call_statement->argument, context);
-    call_instruction* call_op = new call_instruction();
-    call_op->target = context->function_labels[call_statement->function_name];
+    load_instruction* load_argument = new load_instruction();
+    load_argument->location = argumentTarget;
+    load_argument->destination_register = 1;
+
+    instruction* last_op = nullptr;
+    if (strcmp(call_statement->function_name, "print") == 0)
+    {
+        last_op = new print_instruction();
+    }
+    else
+    {
+        call_instruction* call_op = new call_instruction();
+        call_op->target = context->function_labels[call_statement->function_name];
+        last_op = call_op;
+    }
 
     result.head = argument_code.head;
-    concatenate(argument_code, call_op);
-    result.tail = call_op;
+    concatenate(argument_code, load_argument);
+    concatenate(load_argument, last_op);
+    result.tail = last_op;
 
     return result;
 }

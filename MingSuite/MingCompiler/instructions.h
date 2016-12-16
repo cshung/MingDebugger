@@ -131,3 +131,10 @@ struct pop_instruction : instruction
 
     virtual void print();
 };
+
+
+struct print_instruction : instruction
+{
+    virtual ~print_instruction();
+    virtual void print();
+};
