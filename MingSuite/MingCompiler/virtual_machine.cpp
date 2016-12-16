@@ -35,7 +35,7 @@ private:
     int sp;
     int registers[5];
     bool in_break_state;
-    debugger* m_debugger;
+    debugger_virtual_machine_interface* m_debugger_virtual_machine_interface;
 };
 
 virtual_machine::virtual_machine()
@@ -60,7 +60,7 @@ debugger* virtual_machine::debug(instruction_sequence instructions, int entry_po
 
 virtual_machine_impl::virtual_machine_impl()
 {
-    this->m_debugger = nullptr;
+    this->m_debugger_virtual_machine_interface = nullptr;
 }
 
 void virtual_machine_impl::setup(instruction_sequence instructions, int entry_point)
@@ -90,8 +90,9 @@ void virtual_machine_impl::run(instruction_sequence instructions, int entry_poin
 debugger* virtual_machine_impl::debug(instruction_sequence instructions, int entry_point)
 {
     this->setup(instructions, entry_point);
-    this->m_debugger = new debugger(this);
-    return this->m_debugger;
+    debugger* result = new debugger(this);
+    this->m_debugger_virtual_machine_interface = result->get_debugger_virtual_machine_interface();
+    return result;
 }
 
 void virtual_machine_impl::resume()
@@ -115,7 +116,7 @@ void virtual_machine_impl::resume()
     }
     if (this->in_break_state)
     {
-        this->m_debugger->on_breakpoint(this->ip);
+        this->m_debugger_virtual_machine_interface->on_breakpoint(this->ip);
     }
 }
 instruction* virtual_machine_impl::get_instruction(int address)

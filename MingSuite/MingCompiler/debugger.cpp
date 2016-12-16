@@ -2,15 +2,16 @@
 #include <unordered_map>
 using namespace std;
 
-class debugger_impl
+class debugger_impl : public debugger_virtual_machine_interface
 {
 public:
     debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface);
     void resume();
     breakpoint* create_address_breakpoint(int address);
+    virtual void on_breakpoint(int address);
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
-    unordered_map<int, breakpoint*> breakpoints;
+    unordered_map<int, breakpoint_impl*> breakpoints;
 };
 
 class breakpoint_impl
@@ -34,6 +35,11 @@ debugger::~debugger()
     delete this->impl;
 }
 
+debugger_virtual_machine_interface* debugger::get_debugger_virtual_machine_interface()
+{
+    return this->impl;
+}
+
 void debugger::resume()
 {
     this->impl->resume();
@@ -55,23 +61,30 @@ void debugger_impl::resume()
 
 breakpoint* debugger_impl::create_address_breakpoint(int address)
 {
-    breakpoint* result = new breakpoint();
     break_instruction* break_op = new break_instruction();
-    result->impl->set_debugger(this);
-    result->impl->set_original_instruction(this->m_virtual_machine_debugging_interface->get_instruction(address));
+    breakpoint_impl* impl = new breakpoint_impl();
+    impl->set_debugger(this);
+    impl->set_original_instruction(this->m_virtual_machine_debugging_interface->get_instruction(address));
     this->m_virtual_machine_debugging_interface->set_instruction(address, break_op);
-    this->breakpoints.insert(make_pair(address, result));
-    return result;
+    this->breakpoints.insert(make_pair(address, impl));
+    return new breakpoint(impl);
 }
 
-void debugger::on_breakpoint(int address)
+void debugger_impl::on_breakpoint(int address)
 {
-    // TODO: So we reached a breakpoint, now we need to be able to resume without losing it!
+    auto probe = this->breakpoints.find(address);
+    if (probe != this->breakpoints.end())
+    {
+        instruction* original_instruction = probe->second->m_original_instruction;
+        this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
+        // Now the breakpoint is gone, we need to re-enable it
+        // Entering single stepping
+    }
 }
 
-breakpoint::breakpoint()
+breakpoint::breakpoint(breakpoint_impl* impl)
 {
-    this->impl = new breakpoint_impl();
+    this->impl = impl;
 }
 
 breakpoint::~breakpoint()

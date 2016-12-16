@@ -59,5 +59,8 @@ void compiler_impl::compile()
         debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
         debugger->create_address_breakpoint(0);
         debugger->resume();
+        // Now I hit the breakpoint, so I resume again
+        debugger->resume();
+        // TODO: I should hit the breakpoint again, but well, it is not implemented yet.
     }
 }
