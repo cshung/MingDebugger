@@ -132,7 +132,7 @@ literal_node::~literal_node()
 
 expression_node_type literal_node::get_expression_node_type()
 {
-    return literal;
+    return literal_expression;
 }
 
 identifier_node::identifier_node()
@@ -150,7 +150,7 @@ identifier_node::~identifier_node()
 
 expression_node_type identifier_node::get_expression_node_type()
 {
-    return variable;
+    return variable_expression;
 }
 
 call_node::call_node()
@@ -173,7 +173,7 @@ call_node::~call_node()
 
 expression_node_type call_node::get_expression_node_type()
 {
-    return call;
+    return call_expression;
 }
 
 plus_node::plus_node()
@@ -196,7 +196,7 @@ plus_node::~plus_node()
 
 expression_node_type plus_node::get_expression_node_type()
 {
-    return plus_node_type;
+    return plus_expression;
 }
 
 minus_node::minus_node()
@@ -219,5 +219,5 @@ minus_node::~minus_node()
 
 expression_node_type minus_node::get_expression_node_type()
 {
-    return minus_node_type;
+    return minus_expression;
 }

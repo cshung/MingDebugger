@@ -3,19 +3,6 @@
 enum instruction_type
 {
     label,
-    load,
-    load_immediate,
-    compare,
-    store,
-    branch_on_zero,
-    branch,
-    plus,
-    minus,
-    call,
-    return_instruction_type,
-    push,
-    pop,
-    print
 };
 
 struct instruction
@@ -96,82 +83,74 @@ struct store_instruction : instruction
 struct branch_on_zero_instruction : instruction
 {
     ~branch_on_zero_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     int operand;
     label_instruction* branchTo;
+
+    virtual void print();
 };
 
 struct branch_instruction : instruction
 {
     ~branch_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     label_instruction* branchTo;
+
+    virtual void print();
 };
 
 struct plus_instruction : instruction
 {
     virtual ~plus_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     int destination_register;
     int operand1;
     int operand2;
+
+    virtual void print();
 };
 
 struct minus_instruction : instruction
 {
     virtual ~minus_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     int destination_register;
     int operand1;
     int operand2;
+
+    virtual void print();
 };
 
 struct call_instruction : instruction
 {
     virtual ~call_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     label_instruction* target;
+
+    virtual void print();
 };
 
 struct return_instruction : instruction
 {
     virtual ~return_instruction();
-    virtual instruction_type get_instruction_type();
+
     virtual void print();
 };
 
 struct push_instruction : instruction
 {
     virtual ~push_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     int offset;
+
+    virtual void print();
 };
 
 struct pop_instruction : instruction
 {
     virtual ~pop_instruction();
-    virtual instruction_type get_instruction_type();
-    virtual void print();
-
     int offset;
+
+    virtual void print();
 };
 
 
 struct print_instruction : instruction
 {
     virtual ~print_instruction();
-    virtual instruction_type get_instruction_type();
     virtual void print();
 };

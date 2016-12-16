@@ -79,11 +79,11 @@ struct condition_node
 
 enum expression_node_type
 {
-    literal,
-    variable,
-    call,
-    plus_node_type,
-    minus_node_type
+    literal_expression,
+    variable_expression,
+    call_expression,
+    plus_expression,
+    minus_expression
 };
 
 struct expression_node

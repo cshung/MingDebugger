@@ -319,15 +319,15 @@ instruction_sequence code_generator_impl::generate_code(expression_node* express
 {
     switch (expression->get_expression_node_type())
     {
-    case literal:
+    case literal_expression:
         return this->generate_code((literal_node*)expression, context);
-    case variable:
+    case variable_expression:
         return this->generate_code((identifier_node*)expression, context);
-    case call:
+    case call_expression:
         return this->generate_code((call_node*)expression, context);
-    case plus_node_type:
+    case plus_expression:
         return this->generate_code((plus_node*)expression, context);
-    case minus_node_type:
+    case minus_expression:
         return this->generate_code((minus_node*)expression, context);
     default:
         instruction_sequence result;
