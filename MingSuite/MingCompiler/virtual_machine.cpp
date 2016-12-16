@@ -152,12 +152,12 @@ void virtual_machine_impl::execute(branch_instruction* instruction)
 
 void virtual_machine_impl::execute(plus_instruction* instruction)
 {
-    this->registers[instruction->destination_register] = this->registers[instruction->operand1] + this->registers[instruction->operand1];
+    this->registers[instruction->destination_register] = this->registers[instruction->operand1] + this->registers[instruction->operand2];
 }
 
 void virtual_machine_impl::execute(minus_instruction* instruction)
 {
-    this->registers[instruction->destination_register] = this->registers[instruction->operand1] - this->registers[instruction->operand1];
+    this->registers[instruction->destination_register] = this->registers[instruction->operand1] - this->registers[instruction->operand2];
 
 }
 

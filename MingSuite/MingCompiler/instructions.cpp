@@ -150,7 +150,7 @@ instruction_type plus_instruction::get_instruction_type()
 
 void plus_instruction::print()
 {
-    cout << "R" << this->destination_register << " = R" << this->operand1 << " + R" << this->operand2 << endl;
+    cout << "Set R" << this->destination_register << " to R" << this->operand1 << " + R" << this->operand2 << endl;
 }
 
 minus_instruction::~minus_instruction()
@@ -164,7 +164,7 @@ instruction_type minus_instruction::get_instruction_type()
 
 void minus_instruction::print()
 {
-    cout << "R" << this->destination_register << " = R" << this->operand1 << " - R" << this->operand2 << endl;
+    cout << "Set R" << this->destination_register << " to R" << this->operand1 << " - R" << this->operand2 << endl;
 }
 
 call_instruction::~call_instruction()

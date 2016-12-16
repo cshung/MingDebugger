@@ -405,7 +405,7 @@ instruction_sequence code_generator_impl::generate_code(plus_node* plus, code_ge
     context->expressionTarget = left_target;
     instruction_sequence left_code = this->generate_code(plus->left, context);
     context->expressionTarget = right_target;
-    instruction_sequence right_code = this->generate_code(plus->left, context);
+    instruction_sequence right_code = this->generate_code(plus->right, context);
     load_instruction* load_left = new load_instruction();
     load_left->destination_register = 3;
     load_left->location = left_target;
@@ -438,7 +438,7 @@ instruction_sequence code_generator_impl::generate_code(minus_node* minus, code_
     context->expressionTarget = left_target;
     instruction_sequence left_code = this->generate_code(minus->left, context);
     context->expressionTarget = right_target;
-    instruction_sequence right_code = this->generate_code(minus->left, context);
+    instruction_sequence right_code = this->generate_code(minus->right, context);
     load_instruction* load_left = new load_instruction();
     load_left->destination_register = 3;
     load_left->location = left_target;
