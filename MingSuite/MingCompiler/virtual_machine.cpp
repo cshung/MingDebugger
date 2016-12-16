@@ -46,27 +46,36 @@ void virtual_machine::run(instruction_sequence instructions, int entry_point)
 
 void virtual_machine_impl::run(instruction_sequence instructions, int entry_point)
 {
-    data_memory.resize(256);
+    int stack_size = 10000;
+    data_memory.resize(stack_size);
     instruction* cursor = instructions.head;
     while (cursor != nullptr)
     {
         this->code_memory.push_back(cursor);
         cursor = cursor->next;
     }
-    sp = 254;
-    data_memory[255] = -1;
+
+    // Emulating a call coming from ip = -1;
+    sp = stack_size - 1;
+    data_memory[sp] = -1;
+    sp--;
     ip = entry_point;
-    while (true)
+
+    while (this->ip != -1)
     {
         instruction* current = code_memory[this->ip];
+        /*
         current->print();
+        */
         this->execute(current);
+        /*
         cout << "R1 = " << this->registers[1] << endl;
         cout << "R2 = " << this->registers[2] << endl;
         cout << "R3 = " << this->registers[3] << endl;
         cout << "R4 = " << this->registers[4] << endl;
         cout << "SP = " << this->sp << endl;
         cout << "IP = " << this->ip << endl;
+        */
     }
 }
 
@@ -163,15 +172,15 @@ void virtual_machine_impl::execute(minus_instruction* instruction)
 
 void virtual_machine_impl::execute(call_instruction* instruction)
 {
-    this->data_memory[this->sp] = this->ip;
+    this->data_memory[this->sp] = this->ip + 1;
     this->sp--;
     this->ip = instruction->target->address - 1;
 }
 
 void virtual_machine_impl::execute(return_instruction* instruction)
 {
-    this->ip = this->data_memory[this->sp];
     ++this->sp;
+    this->ip = this->data_memory[this->sp] - 1;
 }
 
 void virtual_machine_impl::execute(push_instruction* instruction)
