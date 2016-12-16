@@ -34,3 +34,11 @@ compare_instruction::~compare_instruction()
 store_instruction::~store_instruction()
 {
 }
+
+branch_on_zero_instruction::~branch_on_zero_instruction()
+{
+}
+
+branch_instruction::~branch_instruction()
+{
+}

@@ -48,3 +48,16 @@ struct store_instruction : instruction
     int location;
     int source_register;
 };
+
+struct branch_on_zero_instruction : instruction
+{
+    ~branch_on_zero_instruction();
+    int operand;
+    label_instruction* branchTo;
+};
+
+struct branch_instruction : instruction
+{
+    ~branch_instruction();
+    label_instruction* branchTo;
+};
