@@ -83,43 +83,43 @@ void virtual_machine_impl::execute(instruction* instruction)
 {
     switch (instruction->get_instruction_type())
     {
-    case instruction_type::load:
+    case instruction_type::load_instruction_type:
         execute((load_instruction*)instruction);
         break;
-    case instruction_type::load_immediate:
+    case instruction_type::load_immediate_instruction_type:
         execute((load_immediate_instruction*)instruction);
         break;
-    case instruction_type::compare:
+    case instruction_type::compare_instruction_type:
         execute((compare_instruction*)instruction);
         break;
-    case instruction_type::store:
+    case instruction_type::store_instruction_type:
         execute((store_instruction*)instruction);
         break;
-    case instruction_type::branch_on_zero:
+    case instruction_type::branch_on_zero_instruction_type:
         execute((branch_on_zero_instruction*)instruction);
         break;
-    case instruction_type::branch:
+    case instruction_type::branch_instruction_type:
         execute((branch_instruction*)instruction);
         break;
-    case instruction_type::plus:
+    case instruction_type::plus_instruction_type:
         execute((plus_instruction*)instruction);
         break;
-    case instruction_type::minus:
+    case instruction_type::minus_instruction_type:
         execute((minus_instruction*)instruction);
         break;
-    case instruction_type::call:
+    case instruction_type::call_instruction_type:
         execute((call_instruction*)instruction);
         break;
     case instruction_type::return_instruction_type:
         execute((return_instruction*)instruction);
         break;
-    case instruction_type::push:
+    case instruction_type::push_instruction_type:
         execute((push_instruction*)instruction);
         break;
-    case instruction_type::pop:
+    case instruction_type::pop_instruction_type:
         execute((pop_instruction*)instruction);
         break;
-    case instruction_type::print:
+    case instruction_type::print_instruction_type:
         execute((print_instruction*)instruction);
         break;
     }

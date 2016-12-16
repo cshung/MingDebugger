@@ -2,27 +2,26 @@
 
 enum instruction_type
 {
-    label,
-    load,
-    load_immediate,
-    compare,
-    store,
-    branch_on_zero,
-    branch,
-    plus,
-    minus,
-    call,
+    label_instruction_type,
+    load_instruction_type,
+    load_immediate_instruction_type,
+    compare_instruction_type,
+    store_instruction_type,
+    branch_on_zero_instruction_type,
+    branch_instruction_type,
+    plus_instruction_type,
+    minus_instruction_type,
+    call_instruction_type,
     return_instruction_type,
-    push,
-    pop,
-    print
+    push_instruction_type,
+    pop_instruction_type,
+    print_instruction_type,
 };
 
 struct instruction
 {
     instruction();
     virtual ~instruction();
-    virtual bool is_label();
     virtual instruction_type get_instruction_type() = 0;
 
     virtual void print() = 0;
@@ -42,7 +41,6 @@ struct label_instruction : instruction
 {
     label_instruction();
     virtual ~label_instruction();
-    virtual bool is_label();
     virtual instruction_type get_instruction_type();
     void assign_address(int address);
     virtual void print();

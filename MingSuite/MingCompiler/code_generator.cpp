@@ -120,7 +120,7 @@ code_generation_outputs code_generator_impl::generate_code(program_node* program
     int address = 0;
     while (cursor != end_program)
     {
-        if (cursor->is_label())
+        if (cursor->get_instruction_type() == instruction_type::label_instruction_type)
         {
             label_instruction* label = (label_instruction*)cursor;
             label->assign_address(address);

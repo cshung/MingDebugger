@@ -11,11 +11,6 @@ instruction::~instruction()
 {
 }
 
-bool instruction::is_label()
-{
-    return false;
-}
-
 instruction_sequence::instruction_sequence()
 {
     this->head = nullptr;
@@ -37,12 +32,7 @@ label_instruction::~label_instruction()
 
 instruction_type label_instruction::get_instruction_type()
 {
-    return label;
-}
-
-bool label_instruction::is_label()
-{
-    return true;
+    return label_instruction_type;
 }
 
 void label_instruction::assign_address(int address)
@@ -61,7 +51,7 @@ load_instruction::~load_instruction()
 
 instruction_type load_instruction::get_instruction_type()
 {
-    return load;
+    return instruction_type::load_instruction_type;
 }
 
 void load_instruction::print()
@@ -75,7 +65,7 @@ load_immediate_instruction::~load_immediate_instruction()
 
 instruction_type load_immediate_instruction::get_instruction_type()
 {
-    return load_immediate;
+    return instruction_type::load_immediate_instruction_type;
 }
 
 void load_immediate_instruction::print()
@@ -89,7 +79,7 @@ compare_instruction::~compare_instruction()
 
 instruction_type compare_instruction::get_instruction_type()
 {
-    return compare;
+    return instruction_type::compare_instruction_type;
 }
 
 void compare_instruction::print()
@@ -103,7 +93,7 @@ store_instruction::~store_instruction()
 
 instruction_type store_instruction::get_instruction_type()
 {
-    return store;
+    return instruction_type::store_instruction_type;
 }
 
 void store_instruction::print()
@@ -117,7 +107,7 @@ branch_on_zero_instruction::~branch_on_zero_instruction()
 
 instruction_type branch_on_zero_instruction::get_instruction_type()
 {
-    return branch_on_zero;
+    return instruction_type::branch_on_zero_instruction_type;
 }
 
 void branch_on_zero_instruction::print()
@@ -131,7 +121,7 @@ branch_instruction::~branch_instruction()
 
 instruction_type branch_instruction::get_instruction_type()
 {
-    return branch;
+    return instruction_type::branch_instruction_type;
 }
 
 void branch_instruction::print()
@@ -145,7 +135,7 @@ plus_instruction::~plus_instruction()
 
 instruction_type plus_instruction::get_instruction_type()
 {
-    return instruction_type::plus;
+    return instruction_type::plus_instruction_type;
 }
 
 void plus_instruction::print()
@@ -159,7 +149,7 @@ minus_instruction::~minus_instruction()
 
 instruction_type minus_instruction::get_instruction_type()
 {
-    return instruction_type::minus;
+    return instruction_type::minus_instruction_type;
 }
 
 void minus_instruction::print()
@@ -173,7 +163,7 @@ call_instruction::~call_instruction()
 
 instruction_type call_instruction::get_instruction_type()
 {
-    return instruction_type::call;
+    return instruction_type::call_instruction_type;
 }
 
 void call_instruction::print()
@@ -201,7 +191,7 @@ push_instruction::~push_instruction()
 
 instruction_type push_instruction::get_instruction_type()
 {
-    return instruction_type::push;
+    return instruction_type::push_instruction_type;
 }
 
 void push_instruction::print()
@@ -215,7 +205,7 @@ pop_instruction::~pop_instruction()
 
 instruction_type pop_instruction::get_instruction_type()
 {
-    return instruction_type::pop;
+    return instruction_type::pop_instruction_type;
 }
 
 void pop_instruction::print()
@@ -229,7 +219,7 @@ print_instruction::~print_instruction()
 
 instruction_type print_instruction::get_instruction_type()
 {
-    return instruction_type::print;
+    return instruction_type::print_instruction_type;
 }
 
 void print_instruction::print()
