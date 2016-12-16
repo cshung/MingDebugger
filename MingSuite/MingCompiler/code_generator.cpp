@@ -105,10 +105,15 @@ instruction_sequence code_generator_impl::generate_code(program_node* program, c
     {
         instruction_sequence function_body = this->generate_code(function, context);
         context->functions.insert(make_pair(function->function_name, function_body));
+        instruction* cursor = function_body.head;
+        while (cursor != nullptr)
+        {
+            cursor->print();
+        }
         function = function->next_function;
     }
 
-    // TODO: Layout and linking
+
     return result;
 }
 
@@ -129,20 +134,28 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     }
     instruction_sequence statement_body = generate_code(function->statement, context);
 
+    push_instruction* push = new push_instruction();
+    push->offset = context->tempUsed;
+
+    pop_instruction* pop = new pop_instruction();
+    pop->offset = context->tempUsed;
+
     return_instruction* return_op = new return_instruction();
 
+    result.head = push;
 
     if (store_argument == nullptr)
     {
-        result.head = statement_body.head;
+        concatenate(push, statement_body);
     }
     else
     {
-        result.head = store_argument;
+        concatenate(push, store_argument);
         concatenate(store_argument, statement_body);
     }
+
     concatenate(statement_body, epilog_label);
-    // TODO: Adjust stack space
+
     concatenate(epilog_label, return_op);
     result.tail = return_op;
 

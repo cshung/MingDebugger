@@ -6,6 +6,8 @@ struct instruction
     virtual ~instruction();
     instruction* prev;
     instruction* next;
+
+    virtual void print() = 0;
 };
 
 struct instruction_sequence
@@ -17,7 +19,12 @@ struct instruction_sequence
 
 struct label_instruction : instruction
 {
+    static int label_counter;
+    label_instruction();
     virtual ~label_instruction();
+    int label_id;
+
+    virtual void print();
 };
 
 struct load_instruction : instruction
@@ -25,6 +32,8 @@ struct load_instruction : instruction
     virtual ~load_instruction();
     int destination_register;
     int location;
+
+    virtual void print();
 };
 
 struct load_immediate_instruction : instruction
@@ -32,6 +41,8 @@ struct load_immediate_instruction : instruction
     virtual ~load_immediate_instruction();
     int destination_register;
     int value;
+
+    virtual void print();
 };
 
 struct compare_instruction : instruction
@@ -40,6 +51,8 @@ struct compare_instruction : instruction
     int destination_register;
     int operand1;
     int operand2;
+
+    virtual void print();
 };
 
 struct store_instruction : instruction
@@ -47,6 +60,8 @@ struct store_instruction : instruction
     ~store_instruction();
     int location;
     int source_register;
+
+    virtual void print();
 };
 
 struct branch_on_zero_instruction : instruction
@@ -54,12 +69,16 @@ struct branch_on_zero_instruction : instruction
     ~branch_on_zero_instruction();
     int operand;
     label_instruction* branchTo;
+
+    virtual void print();
 };
 
 struct branch_instruction : instruction
 {
     ~branch_instruction();
     label_instruction* branchTo;
+
+    virtual void print();
 };
 
 struct plus_instruction : instruction
@@ -68,6 +87,8 @@ struct plus_instruction : instruction
     int destination_register;
     int operand1;
     int operand2;
+
+    virtual void print();
 };
 
 struct minus_instruction : instruction
@@ -76,15 +97,37 @@ struct minus_instruction : instruction
     int destination_register;
     int operand1;
     int operand2;
+
+    virtual void print();
 };
 
 struct call_instruction : instruction
 {
     virtual ~call_instruction();
     label_instruction* target;
+
+    virtual void print();
 };
 
 struct return_instruction : instruction
 {
     virtual ~return_instruction();
+
+    virtual void print();
+};
+
+struct push_instruction : instruction
+{
+    virtual ~push_instruction();
+    int offset;
+
+    virtual void print();
+};
+
+struct pop_instruction : instruction
+{
+    virtual ~pop_instruction();
+    int offset;
+
+    virtual void print();
 };
