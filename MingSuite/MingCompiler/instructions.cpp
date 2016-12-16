@@ -226,3 +226,17 @@ void print_instruction::print()
 {
     cout << "print R1" << endl;
 }
+
+break_instruction::~break_instruction()
+{
+}
+
+instruction_type break_instruction::get_instruction_type()
+{
+    return instruction_type::break_instruction_type;
+}
+
+void break_instruction::print()
+{
+    cout << "break" << endl;
+}

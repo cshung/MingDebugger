@@ -6,6 +6,7 @@ using namespace std;
 class virtual_machine_impl : virtual_machine_debugging_interface
 {
 public:
+    virtual_machine_impl();
     void run(instruction_sequence instructions, int entry_point);
     debugger* debug(instruction_sequence instructions, int entry_point);
     virtual void resume();
@@ -25,11 +26,14 @@ private:
     void execute(push_instruction* instruction);
     void execute(pop_instruction* instruction);
     void execute(print_instruction* instruction);
+    void execute(break_instruction* instruction);
     vector<instruction*> code_memory;
     vector<int> data_memory;
     int ip;
     int sp;
     int registers[5];
+    bool in_break_state;
+    debugger* m_debugger;
 };
 
 virtual_machine::virtual_machine()
@@ -52,8 +56,13 @@ debugger* virtual_machine::debug(instruction_sequence instructions, int entry_po
     return this->impl->debug(instructions, entry_point);
 }
 
-void virtual_machine_impl::setup(instruction_sequence instructions, int entry_point)
+virtual_machine_impl::virtual_machine_impl()
 {
+    this->m_debugger = nullptr;
+}
+
+void virtual_machine_impl::setup(instruction_sequence instructions, int entry_point)
+{    
     int stack_size = 10000;
     data_memory.resize(stack_size);
     instruction* cursor = instructions.head;
@@ -79,12 +88,14 @@ void virtual_machine_impl::run(instruction_sequence instructions, int entry_poin
 debugger* virtual_machine_impl::debug(instruction_sequence instructions, int entry_point)
 {
     this->setup(instructions, entry_point);
-    return new debugger(this);
+    this->m_debugger = new debugger(this);
+    return this->m_debugger;
 }
 
 void virtual_machine_impl::resume()
 {
-    while (this->ip != -1)
+    this->in_break_state = false;
+    while (!(this->in_break_state) && (this->ip != -1))
     {
         instruction* current = code_memory[this->ip];
         /*
@@ -144,6 +155,9 @@ void virtual_machine_impl::execute(instruction* instruction)
         break;
     case instruction_type::print_instruction_type:
         execute((print_instruction*)instruction);
+        break;
+    case instruction_type::break_instruction_type:
+        execute((branch_instruction*)instruction);
         break;
     }
     this->ip++;
@@ -219,4 +233,10 @@ void virtual_machine_impl::execute(pop_instruction* instruction)
 void virtual_machine_impl::execute(print_instruction* instruction)
 {
     cout << this->registers[1] << endl;
+}
+
+void virtual_machine_impl::execute(break_instruction* instruction)
+{
+    --this->ip;
+    this->in_break_state = true;
 }

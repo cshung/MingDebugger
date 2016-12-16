@@ -16,6 +16,7 @@ enum instruction_type
     push_instruction_type,
     pop_instruction_type,
     print_instruction_type,
+    break_instruction_type,
 };
 
 struct instruction
@@ -166,10 +167,16 @@ struct pop_instruction : instruction
     int offset;
 };
 
-
 struct print_instruction : instruction
 {
     virtual ~print_instruction();
+    virtual instruction_type get_instruction_type();
+    virtual void print();
+};
+
+struct break_instruction : instruction
+{
+    virtual ~break_instruction();
     virtual instruction_type get_instruction_type();
     virtual void print();
 };
