@@ -9,7 +9,7 @@ public:
     void resume();
     breakpoint* create_address_breakpoint(int address);
     context get_context();
-
+    void remove_breakpoint(int address, instruction* original_instruction);
     virtual void on_breakpoint(int address);
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
@@ -91,10 +91,9 @@ void debugger_impl::on_breakpoint(int address)
     if (this->breakpoint_to_restore != nullptr)
     {
         int breakpoint_address = this->breakpoint_to_restore->address;
-        instruction* break_op = this->breakpoint_to_restore->m_original_instruction;
         instruction* original_instruction = this->m_virtual_machine_debugging_interface->get_instruction(breakpoint_address);
         this->breakpoint_to_restore->m_original_instruction = original_instruction;
-        this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, break_op);
+        this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, new break_instruction());
         this->breakpoint_to_restore = nullptr;
     }
 
@@ -104,7 +103,7 @@ void debugger_impl::on_breakpoint(int address)
         breakpoint_impl* breakpoint = probe->second;
         instruction* original_instruction = breakpoint->m_original_instruction;
         instruction* break_instruction = this->m_virtual_machine_debugging_interface->get_instruction(address);
-        breakpoint->m_original_instruction = break_instruction;
+        delete break_instruction;
         this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
         this->m_virtual_machine_debugging_interface->set_single_step(true);
         this->breakpoint_to_restore = probe->second;
@@ -113,6 +112,18 @@ void debugger_impl::on_breakpoint(int address)
     {
         this->m_virtual_machine_debugging_interface->set_single_step(false);
         this->resume();
+    }
+}
+
+void debugger_impl::remove_breakpoint(int address, instruction* original_instruction)
+{
+    this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
+
+    // If the currently removing breakpoint is to be restored - do not do that anymore.
+    if (this->breakpoint_to_restore != nullptr && this->breakpoint_to_restore->address == address)
+    {
+        this->breakpoint_to_restore = nullptr;
+        this->m_virtual_machine_debugging_interface->set_single_step(false);
     }
 }
 
@@ -133,7 +144,7 @@ void breakpoint::remove()
 
 void breakpoint_impl::remove()
 {
-    // do something
+    this->m_debugger->remove_breakpoint(address, this->m_original_instruction);
 }
 
 void breakpoint_impl::set_debugger(debugger_impl* debugger)

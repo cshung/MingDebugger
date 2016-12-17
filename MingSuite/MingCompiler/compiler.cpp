@@ -59,12 +59,15 @@ void compiler_impl::compile()
         debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
 
         // Setting a breakpoint at the entry point of the fib function
-        debugger->create_address_breakpoint(0);
+        breakpoint* bp = debugger->create_address_breakpoint(0);
         debugger->resume();
         // Reach the breakpoint - what is the argument?
         cout << debugger->get_context().r1 << endl;
         debugger->resume();
         // Reach the breakpoint again - what is the argument?
         cout << debugger->get_context().r1 << endl;
+        bp->remove();
+        debugger->resume();
+        // Now we run to the end!
     }
 }
