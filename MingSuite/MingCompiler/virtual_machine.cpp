@@ -15,6 +15,8 @@ public:
     virtual instruction* get_instruction(int address);
     virtual void set_instruction(int address, instruction* instruction);
     virtual void set_single_step(bool on);
+    virtual context get_context();
+
 private:
     void setup(instruction_sequence instructions, int entry_point);
     void execute(instruction* instruction);
@@ -144,6 +146,18 @@ void virtual_machine_impl::set_instruction(int address, instruction* instruction
 void virtual_machine_impl::set_single_step(bool on)
 {
     this->is_single_step = on;
+}
+
+context virtual_machine_impl::get_context()
+{
+    context result;
+    result.r1 = this->registers[1];
+    result.r2 = this->registers[1];
+    result.r3 = this->registers[1];
+    result.r4 = this->registers[1];
+    result.sp = this->sp;
+    result.ip = this->ip;
+    return result;
 }
 
 void virtual_machine_impl::execute(instruction* instruction)

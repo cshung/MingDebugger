@@ -8,6 +8,8 @@ public:
     debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface);
     void resume();
     breakpoint* create_address_breakpoint(int address);
+    context get_context();
+
     virtual void on_breakpoint(int address);
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
@@ -51,6 +53,11 @@ breakpoint* debugger::create_address_breakpoint(int address)
     return this->impl->create_address_breakpoint(address);
 }
 
+context debugger::get_context()
+{
+    return this->impl->get_context();
+}
+
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
 {
     this->breakpoint_to_restore = nullptr;
@@ -72,6 +79,12 @@ breakpoint* debugger_impl::create_address_breakpoint(int address)
     this->breakpoints.insert(make_pair(address, impl));
     return new breakpoint(impl);
 }
+
+context debugger_impl::get_context()
+{
+    return this->m_virtual_machine_debugging_interface->get_context();
+}
+
 
 void debugger_impl::on_breakpoint(int address)
 {

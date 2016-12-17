@@ -57,12 +57,14 @@ void compiler_impl::compile()
         // TODO: Save the binaries
         virtual_machine vm;
         debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
+
+        // Setting a breakpoint at the entry point of the fib function
         debugger->create_address_breakpoint(0);
         debugger->resume();
-        // Now I hit the breakpoint, so I resume again
+        // Reach the breakpoint - what is the argument?
+        cout << debugger->get_context().r1 << endl;
         debugger->resume();
-        // I am not hitting the breakpoint again - the breakpoint is no longer going away!
-        // TODO: But really, without debugging the interpreter process itself.
-        // How do I know what is going on? Now I need some inspection capabilities
+        // Reach the breakpoint again - what is the argument?
+        cout << debugger->get_context().r1 << endl;
     }
 }
