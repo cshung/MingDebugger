@@ -61,6 +61,8 @@ void compiler_impl::compile()
         debugger->resume();
         // Now I hit the breakpoint, so I resume again
         debugger->resume();
-        // TODO: I should hit the breakpoint again, but well, it is not implemented yet.
+        // I am not hitting the breakpoint again - the breakpoint is no longer going away!
+        // TODO: But really, without debugging the interpreter process itself.
+        // How do I know what is going on? Now I need some inspection capabilities
     }
 }

@@ -27,6 +27,7 @@ public:
     virtual void resume() = 0;
     virtual instruction* get_instruction(int address) = 0;
     virtual void set_instruction(int address, instruction* instruction) = 0;
+    virtual void set_single_step(bool on) = 0;
 };
 
 class debugger_virtual_machine_interface

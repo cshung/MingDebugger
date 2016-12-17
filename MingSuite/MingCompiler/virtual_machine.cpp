@@ -9,9 +9,12 @@ public:
     virtual_machine_impl();
     void run(instruction_sequence instructions, int entry_point);
     debugger* debug(instruction_sequence instructions, int entry_point);
+
+    // virtual_machine_debugging_interface
     virtual void resume();
     virtual instruction* get_instruction(int address);
     virtual void set_instruction(int address, instruction* instruction);
+    virtual void set_single_step(bool on);
 private:
     void setup(instruction_sequence instructions, int entry_point);
     void execute(instruction* instruction);
@@ -34,6 +37,8 @@ private:
     int ip;
     int sp;
     int registers[5];
+
+    bool is_single_step;
     bool in_break_state;
     debugger_virtual_machine_interface* m_debugger_virtual_machine_interface;
 };
@@ -79,6 +84,8 @@ void virtual_machine_impl::setup(instruction_sequence instructions, int entry_po
     data_memory[sp] = -1;
     sp--;
     ip = entry_point;
+
+    this->is_single_step = false;
 }
 
 void virtual_machine_impl::run(instruction_sequence instructions, int entry_point)
@@ -113,6 +120,11 @@ void virtual_machine_impl::resume()
         cout << "SP = " << this->sp << endl;
         cout << "IP = " << this->ip << endl;
         */
+        if (this->is_single_step)
+        {
+            this->in_break_state = true;
+            break;
+        }
     }
     if (this->in_break_state)
     {
@@ -127,6 +139,11 @@ instruction* virtual_machine_impl::get_instruction(int address)
 void virtual_machine_impl::set_instruction(int address, instruction* instruction)
 {
     this->code_memory[address] = instruction;
+}
+
+void virtual_machine_impl::set_single_step(bool on)
+{
+    this->is_single_step = on;
 }
 
 void virtual_machine_impl::execute(instruction* instruction)

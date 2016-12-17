@@ -12,6 +12,7 @@ public:
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
     unordered_map<int, breakpoint_impl*> breakpoints;
+    breakpoint_impl* breakpoint_to_restore;
 };
 
 class breakpoint_impl
@@ -52,6 +53,7 @@ breakpoint* debugger::create_address_breakpoint(int address)
 
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
 {
+    this->breakpoint_to_restore = nullptr;
 }
 
 void debugger_impl::resume()
@@ -61,8 +63,9 @@ void debugger_impl::resume()
 
 breakpoint* debugger_impl::create_address_breakpoint(int address)
 {
-    break_instruction* break_op = new break_instruction();
+    instruction* break_op = new break_instruction();
     breakpoint_impl* impl = new breakpoint_impl();
+    impl->address = address;
     impl->set_debugger(this);
     impl->set_original_instruction(this->m_virtual_machine_debugging_interface->get_instruction(address));
     this->m_virtual_machine_debugging_interface->set_instruction(address, break_op);
@@ -72,13 +75,31 @@ breakpoint* debugger_impl::create_address_breakpoint(int address)
 
 void debugger_impl::on_breakpoint(int address)
 {
+    if (this->breakpoint_to_restore != nullptr)
+    {
+        int breakpoint_address = this->breakpoint_to_restore->address;
+        instruction* break_op = this->breakpoint_to_restore->m_original_instruction;
+        instruction* original_instruction = this->m_virtual_machine_debugging_interface->get_instruction(breakpoint_address);
+        this->breakpoint_to_restore->m_original_instruction = original_instruction;
+        this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, break_op);
+        this->breakpoint_to_restore = nullptr;
+    }
+
     auto probe = this->breakpoints.find(address);
     if (probe != this->breakpoints.end())
     {
-        instruction* original_instruction = probe->second->m_original_instruction;
+        breakpoint_impl* breakpoint = probe->second;
+        instruction* original_instruction = breakpoint->m_original_instruction;
+        instruction* break_instruction = this->m_virtual_machine_debugging_interface->get_instruction(address);
+        breakpoint->m_original_instruction = break_instruction;
         this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
-        // Now the breakpoint is gone, we need to re-enable it
-        // Entering single stepping
+        this->m_virtual_machine_debugging_interface->set_single_step(true);
+        this->breakpoint_to_restore = probe->second;
+    }
+    else
+    {
+        this->m_virtual_machine_debugging_interface->set_single_step(false);
+        this->resume();
     }
 }
 
