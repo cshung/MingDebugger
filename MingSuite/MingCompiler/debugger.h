@@ -28,6 +28,7 @@ public:
     void resume();
     breakpoint* create_address_breakpoint(int address);
     virtual context get_context();
+    virtual void step_instruction();
 
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();
 private:

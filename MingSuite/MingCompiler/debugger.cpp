@@ -8,6 +8,8 @@ public:
     debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface);
     void resume();
     breakpoint* create_address_breakpoint(int address);
+    void step_instruction();
+
     context get_context();
     void remove_breakpoint(int address, instruction* original_instruction);
     virtual void on_breakpoint(int address);
@@ -58,6 +60,11 @@ context debugger::get_context()
     return this->impl->get_context();
 }
 
+void debugger::step_instruction()
+{
+    this->impl->step_instruction();
+}
+
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
 {
     this->breakpoint_to_restore = nullptr;
@@ -85,6 +92,11 @@ context debugger_impl::get_context()
     return this->m_virtual_machine_debugging_interface->get_context();
 }
 
+void debugger_impl::step_instruction()
+{
+    this->m_virtual_machine_debugging_interface->set_single_step(true);
+    this->resume();
+}
 
 void debugger_impl::on_breakpoint(int address)
 {

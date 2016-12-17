@@ -67,6 +67,9 @@ void compiler_impl::compile()
         // Reach the breakpoint again - what is the argument?
         cout << debugger->get_context().r1 << endl;
         bp->remove();
+        cout << debugger->get_context().ip << endl;
+        debugger->step_instruction();
+        cout << debugger->get_context().ip << endl;
         debugger->resume();
         // Now we run to the end!
     }
