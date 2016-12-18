@@ -43,7 +43,7 @@ private:
     int registers[5];
 
     bool is_single_step;
-    bool in_break_state;
+    bool break_instruction_executed;
     debugger_virtual_machine_interface* m_debugger_virtual_machine_interface;
 };
 
@@ -70,6 +70,8 @@ debugger* virtual_machine::debug(instruction_sequence instructions, int entry_po
 virtual_machine_impl::virtual_machine_impl()
 {
     this->m_debugger_virtual_machine_interface = nullptr;
+    this->is_single_step = false;
+    this->break_instruction_executed = false;
 }
 
 void virtual_machine_impl::setup(instruction_sequence instructions, int entry_point)
@@ -88,8 +90,6 @@ void virtual_machine_impl::setup(instruction_sequence instructions, int entry_po
     data_memory[sp] = -1;
     sp--;
     ip = entry_point;
-
-    this->is_single_step = false;
 }
 
 void virtual_machine_impl::run(instruction_sequence instructions, int entry_point)
@@ -108,8 +108,7 @@ debugger* virtual_machine_impl::debug(instruction_sequence instructions, int ent
 
 void virtual_machine_impl::resume()
 {
-    this->in_break_state = false;
-    while (!(this->in_break_state) && (this->ip != -1))
+    while (this->ip != -1)
     {
         instruction* current = code_memory[this->ip];
         /*
@@ -124,15 +123,27 @@ void virtual_machine_impl::resume()
         cout << "SP = " << this->sp << endl;
         cout << "IP = " << this->ip << endl;
         */
+        if (this->break_instruction_executed)
+        {
+            break;
+        }
         if (this->is_single_step)
         {
-            this->in_break_state = true;
             break;
         }
     }
-    if (this->in_break_state)
+    if (this->break_instruction_executed)
     {
-        this->m_debugger_virtual_machine_interface->on_breakpoint(this->ip);
+        this->break_instruction_executed = false;
+        this->m_debugger_virtual_machine_interface->on_break_instruction();
+    }
+    else if (this->is_single_step)
+    {
+        this->m_debugger_virtual_machine_interface->on_single_step();
+    }
+    else if (this->ip == -1)
+    {
+        this->m_debugger_virtual_machine_interface->on_terminate();
     }
 }
 instruction* virtual_machine_impl::get_instruction(int address)
@@ -306,6 +317,5 @@ void virtual_machine_impl::execute(print_instruction* instruction)
 
 void virtual_machine_impl::execute(break_instruction* instruction)
 {
-    --this->ip;
-    this->in_break_state = true;
+    this->break_instruction_executed = true;
 }

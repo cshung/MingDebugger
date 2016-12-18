@@ -54,7 +54,9 @@ public:
 class debugger_virtual_machine_interface
 {
 public:
-    virtual void on_breakpoint(int address) = 0;
+    virtual void on_break_instruction() = 0;
+    virtual void on_single_step() = 0;
+    virtual void on_terminate() = 0;
 };
 
 class breakpoint

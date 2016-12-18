@@ -1,5 +1,6 @@
 #include "debugger.h"
 #include <unordered_map>
+#include <iostream>
 using namespace std;
 
 class debugger_impl : public debugger_virtual_machine_interface
@@ -14,7 +15,11 @@ public:
     context get_context();
     void set_context(context c);
     void remove_breakpoint(int address, instruction* original_instruction);
-    virtual void on_breakpoint(int address);
+
+    // debugger_virtual_machine_interface
+    virtual void on_break_instruction();
+    virtual void on_single_step();
+    virtual void on_terminate();
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
     unordered_map<int, breakpoint_impl*> breakpoints;
@@ -133,7 +138,27 @@ void debugger_impl::write_memory(int address, int content)
     this->m_virtual_machine_debugging_interface->write_memory(address, content);
 }
 
-void debugger_impl::on_breakpoint(int address)
+void debugger_impl::on_break_instruction()
+{
+    if (is_single_step_requested)
+    {
+        this->is_single_step_requested = false;
+    }
+
+    int break_instruction_address = this->m_virtual_machine_debugging_interface->get_context().ip - 1;
+    breakpoint_impl* breakpoint = this->breakpoints[break_instruction_address];
+    instruction* original_instruction = breakpoint->m_original_instruction;
+    instruction* break_instruction = this->m_virtual_machine_debugging_interface->get_instruction(break_instruction_address);
+    delete break_instruction;
+    this->m_virtual_machine_debugging_interface->set_instruction(break_instruction_address, original_instruction);
+    this->m_virtual_machine_debugging_interface->set_single_step(true);
+    context c = this->m_virtual_machine_debugging_interface->get_context();
+    c.ip--;
+    this->m_virtual_machine_debugging_interface->set_context(c);
+    this->breakpoint_to_restore = breakpoint;
+    
+}
+void debugger_impl::on_single_step()
 {
     if (this->breakpoint_to_restore != nullptr)
     {
@@ -143,19 +168,7 @@ void debugger_impl::on_breakpoint(int address)
         this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, new break_instruction());
         this->breakpoint_to_restore = nullptr;
     }
-
-    auto probe = this->breakpoints.find(address);
-    if (probe != this->breakpoints.end())
-    {
-        breakpoint_impl* breakpoint = probe->second;
-        instruction* original_instruction = breakpoint->m_original_instruction;
-        instruction* break_instruction = this->m_virtual_machine_debugging_interface->get_instruction(address);
-        delete break_instruction;
-        this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
-        this->m_virtual_machine_debugging_interface->set_single_step(true);
-        this->breakpoint_to_restore = probe->second;
-    }
-    else if (is_single_step_requested)
+    if (is_single_step_requested)
     {
         this->is_single_step_requested = false;
     }
@@ -166,6 +179,10 @@ void debugger_impl::on_breakpoint(int address)
     }
 }
 
+void debugger_impl::on_terminate()
+{
+    cout << "Process terminated" << endl;
+}
 void debugger_impl::remove_breakpoint(int address, instruction* original_instruction)
 {
     this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
