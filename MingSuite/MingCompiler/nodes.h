@@ -8,14 +8,22 @@ struct condition_node;
 struct expression_node;
 class parser_impl;
 
-struct program_node
+struct parse_node
+{
+    int begin_line;
+    int begin_column;
+    int end_line;
+    int end_column;
+};
+
+struct program_node : parse_node
 {
     ~program_node();
 
     function_node* function;
 };
 
-struct function_node
+struct function_node : parse_node
 {
     function_node();
     ~function_node();
@@ -33,7 +41,7 @@ enum statement_node_type
     call_statement
 };
 
-struct statement_node
+struct statement_node : parse_node
 {
     virtual ~statement_node();
     virtual statement_node_type get_statement_node_type() = 0;
@@ -69,7 +77,7 @@ struct call_statement_node : public statement_node
     expression_node* argument;
 };
 
-struct condition_node
+struct condition_node : parse_node
 {
     condition_node();
     ~condition_node();
@@ -86,7 +94,7 @@ enum expression_node_type
     minus_expression
 };
 
-struct expression_node
+struct expression_node : parse_node
 {
     virtual ~expression_node();
     virtual expression_node_type get_expression_node_type() = 0;
