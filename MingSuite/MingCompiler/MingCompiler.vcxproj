@@ -163,6 +163,7 @@
     <ClInclude Include="nodes.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="scanner.h" />
+    <ClInclude Include="symbols.h" />
     <ClInclude Include="utilities.h" />
     <ClInclude Include="virtual_machine.h" />
   </ItemGroup>

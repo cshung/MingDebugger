@@ -2,6 +2,7 @@
 
 #include "nodes.h"
 #include "instructions.h"
+#include "symbols.h"
 
 class code_generator_impl;
 
@@ -9,6 +10,7 @@ struct code_generation_outputs
 {
     instruction_sequence instructions;
     int entry_point;
+    symbols symbols;
 };
 
 class code_generator
