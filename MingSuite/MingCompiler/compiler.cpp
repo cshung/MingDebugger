@@ -69,6 +69,7 @@ void compiler_impl::compile()
         bp->remove();
         cout << debugger->get_context().ip << endl;
         debugger->step_instruction();
+        // Now we are in the second instruction of the current method!
         cout << debugger->get_context().ip << endl;
         debugger->resume();
         // Now we run to the end!

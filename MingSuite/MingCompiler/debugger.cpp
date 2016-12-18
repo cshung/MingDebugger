@@ -17,6 +17,7 @@ private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
     unordered_map<int, breakpoint_impl*> breakpoints;
     breakpoint_impl* breakpoint_to_restore;
+    bool is_single_step_requested;
 };
 
 class breakpoint_impl
@@ -68,6 +69,7 @@ void debugger::step_instruction()
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
 {
     this->breakpoint_to_restore = nullptr;
+    this->is_single_step_requested = false;
 }
 
 void debugger_impl::resume()
@@ -95,6 +97,7 @@ context debugger_impl::get_context()
 void debugger_impl::step_instruction()
 {
     this->m_virtual_machine_debugging_interface->set_single_step(true);
+    this->is_single_step_requested = true;
     this->resume();
 }
 
@@ -119,6 +122,10 @@ void debugger_impl::on_breakpoint(int address)
         this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
         this->m_virtual_machine_debugging_interface->set_single_step(true);
         this->breakpoint_to_restore = probe->second;
+    }
+    else if (is_single_step_requested)
+    {
+        this->is_single_step_requested = false;
     }
     else
     {
