@@ -16,8 +16,9 @@ public:
     virtual void set_instruction(int address, instruction* instruction);
     virtual void set_single_step(bool on);
     virtual context get_context();
+    virtual void set_context(context c);
     virtual int read_memory(int address);
-
+    virtual void write_memory(int address, int content);
 private:
     void setup(instruction_sequence instructions, int entry_point);
     void execute(instruction* instruction);
@@ -153,17 +154,32 @@ context virtual_machine_impl::get_context()
 {
     context result;
     result.r1 = this->registers[1];
-    result.r2 = this->registers[1];
-    result.r3 = this->registers[1];
-    result.r4 = this->registers[1];
+    result.r2 = this->registers[2];
+    result.r3 = this->registers[3];
+    result.r4 = this->registers[4];
     result.sp = this->sp;
     result.ip = this->ip;
     return result;
 }
 
+void virtual_machine_impl::set_context(context c)
+{
+    this->registers[1] = c.r1;
+    this->registers[2] = c.r2;
+    this->registers[3] = c.r3;
+    this->registers[4] = c.r4;
+    this->sp = c.sp;
+    this->ip = c.ip;
+}
+
 int virtual_machine_impl::read_memory(int address)
 {
     return this->data_memory[address];
+}
+
+void virtual_machine_impl::write_memory(int address, int content)
+{
+    this->data_memory[address] = content;
 }
 
 void virtual_machine_impl::execute(instruction* instruction)

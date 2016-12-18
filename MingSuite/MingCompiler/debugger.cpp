@@ -10,8 +10,9 @@ public:
     breakpoint* create_address_breakpoint(int address);
     void step_instruction();
     int read_memory(int address);
-
+    void write_memory(int address, int content);
     context get_context();
+    void set_context(context c);
     void remove_breakpoint(int address, instruction* original_instruction);
     virtual void on_breakpoint(int address);
 private:
@@ -62,6 +63,11 @@ context debugger::get_context()
     return this->impl->get_context();
 }
 
+void debugger::set_context(context c)
+{
+    this->impl->set_context(c);
+}
+
 void debugger::step_instruction()
 {
     this->impl->step_instruction();
@@ -70,6 +76,11 @@ void debugger::step_instruction()
 int debugger::read_memory(int address)
 {
     return this->impl->read_memory(address);
+}
+
+void debugger::write_memory(int address, int content)
+{
+    this->impl->write_memory(address, content);
 }
 
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
@@ -100,6 +111,11 @@ context debugger_impl::get_context()
     return this->m_virtual_machine_debugging_interface->get_context();
 }
 
+void debugger_impl::set_context(context c)
+{
+    this->m_virtual_machine_debugging_interface->set_context(c);
+}
+
 void debugger_impl::step_instruction()
 {
     this->m_virtual_machine_debugging_interface->set_single_step(true);
@@ -110,6 +126,11 @@ void debugger_impl::step_instruction()
 int debugger_impl::read_memory(int address)
 {
     return this->m_virtual_machine_debugging_interface->read_memory(address);
+}
+
+void debugger_impl::write_memory(int address, int content)
+{
+    this->m_virtual_machine_debugging_interface->write_memory(address, content);
 }
 
 void debugger_impl::on_breakpoint(int address)

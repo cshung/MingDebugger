@@ -28,8 +28,10 @@ public:
     void resume();
     breakpoint* create_address_breakpoint(int address);
     virtual context get_context();
+    virtual void set_context(context c);
     virtual void step_instruction();
     virtual int read_memory(int address);
+    virtual void write_memory(int address, int content);
 
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();
 private:
@@ -44,7 +46,9 @@ public:
     virtual void set_instruction(int address, instruction* instruction) = 0;
     virtual void set_single_step(bool on) = 0;
     virtual context get_context() = 0;
+    virtual void set_context(context c) = 0;
     virtual int read_memory(int address) = 0;
+    virtual void write_memory(int address, int content) = 0;
 };
 
 class debugger_virtual_machine_interface

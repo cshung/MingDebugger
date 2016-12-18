@@ -55,11 +55,14 @@ void compiler_impl::compile()
         code_generator c;
         code_generation_outputs binaries = c.generate_code(program);
 
+        int address = 0;
         instruction* cursor = binaries.instructions.head;
         while (cursor != nullptr)
         {
+            cout << address << ": ";
             cursor->print();
             cursor = cursor->next;
+            address++;
         }
 
         // TODO: Save the binaries
