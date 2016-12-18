@@ -16,6 +16,7 @@ public:
     virtual void set_instruction(int address, instruction* instruction);
     virtual void set_single_step(bool on);
     virtual context get_context();
+    virtual int read_memory(int address);
 
 private:
     void setup(instruction_sequence instructions, int entry_point);
@@ -158,6 +159,11 @@ context virtual_machine_impl::get_context()
     result.sp = this->sp;
     result.ip = this->ip;
     return result;
+}
+
+int virtual_machine_impl::read_memory(int address)
+{
+    return this->data_memory[address];
 }
 
 void virtual_machine_impl::execute(instruction* instruction)

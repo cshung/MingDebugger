@@ -54,6 +54,14 @@ void compiler_impl::compile()
     {
         code_generator c;
         code_generation_outputs binaries = c.generate_code(program);
+
+        instruction* cursor = binaries.instructions.head;
+        while (cursor != nullptr)
+        {
+            cursor->print();
+            cursor = cursor->next;
+        }
+
         // TODO: Save the binaries
         virtual_machine vm;
         debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
@@ -69,8 +77,9 @@ void compiler_impl::compile()
         bp->remove();
         cout << debugger->get_context().ip << endl;
         debugger->step_instruction();
-        // Now we are in the second instruction of the current method!
-        cout << debugger->get_context().ip << endl;
+        debugger->step_instruction();
+        int argument_address = debugger->get_context().sp + 1;
+        cout << debugger->read_memory(argument_address) << endl;
         debugger->resume();
         // Now we run to the end!
     }

@@ -9,6 +9,7 @@ public:
     void resume();
     breakpoint* create_address_breakpoint(int address);
     void step_instruction();
+    int read_memory(int address);
 
     context get_context();
     void remove_breakpoint(int address, instruction* original_instruction);
@@ -66,6 +67,11 @@ void debugger::step_instruction()
     this->impl->step_instruction();
 }
 
+int debugger::read_memory(int address)
+{
+    return this->impl->read_memory(address);
+}
+
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
 {
     this->breakpoint_to_restore = nullptr;
@@ -99,6 +105,11 @@ void debugger_impl::step_instruction()
     this->m_virtual_machine_debugging_interface->set_single_step(true);
     this->is_single_step_requested = true;
     this->resume();
+}
+
+int debugger_impl::read_memory(int address)
+{
+    return this->m_virtual_machine_debugging_interface->read_memory(address);
 }
 
 void debugger_impl::on_breakpoint(int address)
