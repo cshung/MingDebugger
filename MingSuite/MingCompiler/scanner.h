@@ -31,6 +31,10 @@ public:
     token_type get_token_type();
     const char* get_token_begin();
     const char* get_token_end();
+    int get_token_begin_line();
+    int get_token_begin_column();
+    int get_token_end_line();
+    int get_token_end_column();
     char* get_token_string();
     int get_token_integer_value();
 private:
