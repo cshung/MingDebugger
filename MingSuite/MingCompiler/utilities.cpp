@@ -11,14 +11,14 @@ bool is_file_exists(const char* filename)
 
 bool is_begins_with(const char* source, const char* pattern)
 {
-    int source_length = strlen(source);
-    int pattern_length = strlen(pattern);
+    size_t source_length = strlen(source);
+    size_t pattern_length = strlen(pattern);
     if (pattern_length > source_length)
     {
         return false;
     }
 
-    for (int i = 0; i < pattern_length; i++)
+    for (size_t  i = 0; i < pattern_length; i++)
     {
         if (source[i] != pattern[i])
         {
@@ -31,14 +31,14 @@ bool is_begins_with(const char* source, const char* pattern)
 
 bool is_ends_with(const char* source, const char* pattern)
 {
-    int source_length = strlen(source);
-    int pattern_length = strlen(pattern);
+    size_t  source_length = strlen(source);
+    size_t  pattern_length = strlen(pattern);
     if (pattern_length > source_length)
     {
         return false;
     }
 
-    for (int i = 0; i < pattern_length; i++)
+    for (size_t  i = 0; i < pattern_length; i++)
     {
         if (source[source_length - pattern_length + i] != pattern[i])
         {

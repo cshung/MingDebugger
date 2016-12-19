@@ -279,7 +279,7 @@ int scanner_impl::get_token_end_column()
 
 char* scanner_impl::get_token_string()
 {
-    int length = this->get_token_end() - this->get_token_begin();
+    size_t length = this->get_token_end() - this->get_token_begin();
     char* result = new char[length + 1];
     char* output = result;
     for (const char* p = this->get_token_begin(); p < this->get_token_end(); p++, output++)
