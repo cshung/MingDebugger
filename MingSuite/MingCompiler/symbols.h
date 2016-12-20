@@ -11,7 +11,7 @@ struct local_symbols
     int address;
 };
 
-struct function_symbols
+struct function_symbol
 {
     string function_name;
     int entry_point;
@@ -19,18 +19,17 @@ struct function_symbols
     vector<local_symbols> locals;
 };
 
-struct statement
+struct statement_symbol
 {
-    int start_line;
-    int start_column;
+    int begin_line;
+    int begin_column;
     int end_line;
     int end_column;
     int start_address;
-    int end_address;
 };
 
 struct symbols
 {
-    vector<function_symbols> functions;
-    vector<statement> statements;
+    vector<function_symbol> functions;
+    vector<statement_symbol> statements;
 };

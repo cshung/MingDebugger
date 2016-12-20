@@ -5,9 +5,19 @@ using namespace std;
 
 struct function_symbol_labels
 {
+    string function_name;
     label_instruction* entry_point_label;
     label_instruction* after_exit_label;
     vector<local_symbols> local_symbols;
+};
+
+struct statement_symbol_label
+{
+    label_instruction* statement_label;
+    int begin_line;
+    int begin_column;
+    int end_line;
+    int end_column;
 };
 
 struct code_generation_context
@@ -15,7 +25,8 @@ struct code_generation_context
     code_generation_context();
     ~code_generation_context();
     unordered_map<string, label_instruction*> function_labels;
-    unordered_map<string, function_symbol_labels> function_symbol_labels;
+    vector<function_symbol_labels> function_symbol_labels;
+    vector<statement_symbol_label> statement_symbol_labels;
     unordered_map<string, int> variables;
     label_instruction* epilog_label;
     int tempUsed;
@@ -156,15 +167,26 @@ code_generation_outputs code_generator_impl::generate_code(program_node* program
 
     for (auto&& function_symbol_label : context->function_symbol_labels)
     {
-        function_symbols symbol;
-        symbol.function_name = function_symbol_label.first;
-        symbol.entry_point = function_symbol_label.second.entry_point_label->address;
-        symbol.after_exit = function_symbol_label.second.after_exit_label->address;
-        for (auto&& local_symbol : function_symbol_label.second.local_symbols)
+        function_symbol symbol;
+        symbol.function_name = function_symbol_label.function_name;
+        symbol.entry_point = function_symbol_label.entry_point_label->address;
+        symbol.after_exit = function_symbol_label.after_exit_label->address;
+        for (auto&& local_symbol : function_symbol_label.local_symbols)
         {
             symbol.locals.push_back(local_symbol);
         }
         output.symbols.functions.push_back(symbol);
+    }
+
+    for (auto&& statement_symbol_label : context->statement_symbol_labels)
+    {
+        statement_symbol symbol;
+        symbol.start_address = statement_symbol_label.statement_label->address;
+        symbol.begin_line = statement_symbol_label.begin_line;
+        symbol.begin_column = statement_symbol_label.begin_column;
+        symbol.end_line = statement_symbol_label.end_line;
+        symbol.end_column = statement_symbol_label.end_column;
+        output.symbols.statements.push_back(symbol);
     }
 
     return output;
@@ -227,7 +249,9 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     concatenate(return_op, after_exit_label);
     result.tail = after_exit_label;
 
-    context->function_symbol_labels.insert(make_pair(function->function_name, symbols));
+    symbols.function_name = function->function_name;
+
+    context->function_symbol_labels.push_back(symbols);
 
     return result;
 }
@@ -321,6 +345,9 @@ instruction_sequence code_generator_impl::generate_code(return_statement_node* r
 instruction_sequence code_generator_impl::generate_code(call_statement_node* call_statement, code_generation_context* context)
 {
     instruction_sequence result;
+
+    label_instruction* before_call_label = new label_instruction();
+
     int argumentTarget = ++context->tempUsed;
     context->expressionTarget = argumentTarget;
     instruction_sequence argument_code = this->generate_code(call_statement->argument, context);
@@ -340,10 +367,20 @@ instruction_sequence code_generator_impl::generate_code(call_statement_node* cal
         last_op = call_op;
     }
 
-    result.head = argument_code.head;
+    result.head = before_call_label;
+    concatenate(before_call_label, argument_code.head);
     concatenate(argument_code, load_argument);
     concatenate(load_argument, last_op);
     result.tail = last_op;
+
+    statement_symbol_label statement_symbol;
+    statement_symbol.statement_label = before_call_label;
+    statement_symbol.begin_line = call_statement->begin_line;
+    statement_symbol.begin_column = call_statement->begin_column;
+    statement_symbol.end_line = call_statement->end_line;
+    statement_symbol.end_column = call_statement->end_column;
+
+    context->statement_symbol_labels.push_back(statement_symbol);
 
     return result;
 }
@@ -498,6 +535,9 @@ instruction_sequence code_generator_impl::generate_code(minus_node* minus, code_
 instruction_sequence code_generator_impl::generate_code(condition_node* condition, code_generation_context* context)
 {
     instruction_sequence result;
+
+    label_instruction* before_condition_label = new label_instruction();
+
     int variable_location = context->variables[condition->variable_name];
     int literal = condition->value;
     // load r3, variable_location
@@ -521,11 +561,21 @@ instruction_sequence code_generator_impl::generate_code(condition_node* conditio
     store->location = context->expressionTarget;
     store->source_register = 2;
 
-    result.head = load_variable;
+    result.head = before_condition_label;
+    concatenate(before_condition_label, load_variable);
     concatenate(load_variable, load_literal);
     concatenate(load_literal, compare);
     concatenate(compare, store);
     result.tail = store;
+
+    statement_symbol_label statement_symbol;
+    statement_symbol.statement_label = before_condition_label;
+    statement_symbol.begin_line = condition->begin_line;
+    statement_symbol.begin_column = condition->begin_column;
+    statement_symbol.end_line = condition->end_line;
+    statement_symbol.end_column = condition->end_column;
+
+    context->statement_symbol_labels.push_back(statement_symbol);
 
     return result;
 }
