@@ -321,6 +321,9 @@ instruction_sequence code_generator_impl::generate_code(if_statement_node* if_st
 instruction_sequence code_generator_impl::generate_code(return_statement_node* return_statement, code_generation_context* context)
 {
     instruction_sequence result;
+
+    label_instruction* before_return_label = new label_instruction();
+
     int value_target = ++context->tempUsed;
     context->expressionTarget = value_target;
     instruction_sequence value_code = this->generate_code(return_statement->value, context);
@@ -334,10 +337,20 @@ instruction_sequence code_generator_impl::generate_code(return_statement_node* r
     branch_instruction* branch_to_epilog = new branch_instruction();
     branch_to_epilog->branchTo = context->epilog_label;
 
-    result.head = value_code.head;
+    result.head = before_return_label;
+    concatenate(before_return_label, value_code);
     concatenate(value_code, load_value);
     concatenate(load_value, branch_to_epilog);
     result.tail = branch_to_epilog;
+
+    statement_symbol_label symbol;
+    symbol.statement_label = before_return_label;
+    symbol.begin_line = return_statement->begin_line;
+    symbol.begin_column = return_statement->begin_column;
+    symbol.end_line = return_statement->end_line;
+    symbol.end_column = return_statement->end_column;
+
+    context->statement_symbol_labels.push_back(symbol);
 
     return result;
 }
@@ -368,7 +381,7 @@ instruction_sequence code_generator_impl::generate_code(call_statement_node* cal
     }
 
     result.head = before_call_label;
-    concatenate(before_call_label, argument_code.head);
+    concatenate(before_call_label, argument_code);
     concatenate(argument_code, load_argument);
     concatenate(load_argument, last_op);
     result.tail = last_op;
@@ -444,6 +457,9 @@ instruction_sequence code_generator_impl::generate_code(identifier_node* variabl
 instruction_sequence code_generator_impl::generate_code(call_node* call, code_generation_context* context)
 {
     instruction_sequence result;
+
+    label_instruction* before_call_label = new label_instruction();
+
     int expressionTarget = context->expressionTarget;
     int argumentTarget = ++context->tempUsed;
     context->expressionTarget = argumentTarget;
@@ -457,11 +473,21 @@ instruction_sequence code_generator_impl::generate_code(call_node* call, code_ge
     store->source_register = 2;
     store->location = expressionTarget;
 
-    result.head = argument_code.head;
+    result.head = before_call_label;
+    concatenate(before_call_label, argument_code);
     concatenate(argument_code, load_argument);
     concatenate(load_argument, call_op);
     concatenate(call_op, store);
     result.tail = store;
+
+    statement_symbol_label symbol;
+    symbol.statement_label = before_call_label;
+    symbol.begin_line = call->begin_line;
+    symbol.begin_column = call->begin_column;
+    symbol.end_line = call->end_line;
+    symbol.end_column = call->end_column;
+
+    context->statement_symbol_labels.push_back(symbol);
 
     return result;
 }
