@@ -12,7 +12,7 @@ struct function_symbols
     int after_exit;
 };
 
-class symbols
+struct symbols
 {
     vector<function_symbols> functions;
 };

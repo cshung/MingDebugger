@@ -3,11 +3,19 @@
 #include <unordered_map>
 using namespace std;
 
+struct function_symbol_labels
+{
+    label_instruction* entry_point_label;
+    label_instruction* after_prolog_label;
+    label_instruction* after_exit_label;
+};
+
 struct code_generation_context
 {
     code_generation_context();
     ~code_generation_context();
     unordered_map<string, label_instruction*> function_labels;
+    unordered_map<string, function_symbol_labels> function_symbol_labels;
     unordered_map<string, int> variables;
     label_instruction* epilog_label;
     int tempUsed;
@@ -146,11 +154,22 @@ code_generation_outputs code_generator_impl::generate_code(program_node* program
     output.instructions = result;
     output.entry_point = context->function_labels["main"]->address;
 
+    for (auto&& function_symbol_label : context->function_symbol_labels)
+    {
+        function_symbols symbol;
+        symbol.function_name = function_symbol_label.first;
+        symbol.entry_point = function_symbol_label.second.entry_point_label->address;
+        symbol.after_prolog = function_symbol_label.second.after_prolog_label->address;
+        symbol.after_exit = function_symbol_label.second.after_exit_label->address;
+        output.symbols.functions.push_back(symbol);
+    }
+
     return output;
 }
 
 instruction_sequence code_generator_impl::generate_code(function_node* function, code_generation_context* context)
 {
+    function_symbol_labels symbols;
     instruction_sequence result;
     label_instruction* epilog_label = new label_instruction();
     context->epilog_label = epilog_label;
@@ -175,6 +194,12 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     return_instruction* return_op = new return_instruction();
 
     label_instruction* function_label = context->function_labels[function->function_name];
+    label_instruction* after_prolog_label = new label_instruction();
+    label_instruction* after_exit_label = new label_instruction();
+
+    symbols.entry_point_label = function_label;
+    symbols.after_prolog_label = after_prolog_label;
+    symbols.after_exit_label = after_exit_label;
 
     result.head = function_label;
 
@@ -182,11 +207,13 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
 
     if (store_argument == nullptr)
     {
-        concatenate(push, statement_body);
+        concatenate(push, after_prolog_label);
+        concatenate(after_prolog_label, statement_body);
     }
     else
     {
         concatenate(push, store_argument);
+        concatenate(store_argument, after_prolog_label);
         concatenate(store_argument, statement_body);
     }
 
@@ -195,6 +222,8 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     concatenate(epilog_label, pop);
     concatenate(pop, return_op);
     result.tail = return_op;
+
+    context->function_symbol_labels.insert(make_pair(function->function_name, symbols));
 
     return result;
 }
