@@ -6,8 +6,8 @@ using namespace std;
 struct function_symbol_labels
 {
     label_instruction* entry_point_label;
-    label_instruction* after_prolog_label;
     label_instruction* after_exit_label;
+    vector<local_symbols> local_symbols;
 };
 
 struct code_generation_context
@@ -159,8 +159,11 @@ code_generation_outputs code_generator_impl::generate_code(program_node* program
         function_symbols symbol;
         symbol.function_name = function_symbol_label.first;
         symbol.entry_point = function_symbol_label.second.entry_point_label->address;
-        symbol.after_prolog = function_symbol_label.second.after_prolog_label->address;
         symbol.after_exit = function_symbol_label.second.after_exit_label->address;
+        for (auto&& local_symbol : function_symbol_label.second.local_symbols)
+        {
+            symbol.locals.push_back(local_symbol);
+        }
         output.symbols.functions.push_back(symbol);
     }
 
@@ -178,6 +181,10 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     if (function->argument_name != nullptr)
     {
         int argument_location = ++context->tempUsed;
+        local_symbols local_symbol;
+        local_symbol.local_name = function->argument_name;
+        local_symbol.address = argument_location;
+        symbols.local_symbols.push_back(local_symbol);
         store_argument = new store_instruction();
         store_argument->source_register = 1;
         store_argument->location = argument_location;
@@ -194,11 +201,9 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
     return_instruction* return_op = new return_instruction();
 
     label_instruction* function_label = context->function_labels[function->function_name];
-    label_instruction* after_prolog_label = new label_instruction();
     label_instruction* after_exit_label = new label_instruction();
 
     symbols.entry_point_label = function_label;
-    symbols.after_prolog_label = after_prolog_label;
     symbols.after_exit_label = after_exit_label;
 
     result.head = function_label;
@@ -207,13 +212,11 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
 
     if (store_argument == nullptr)
     {
-        concatenate(push, after_prolog_label);
-        concatenate(after_prolog_label, statement_body);
+        concatenate(push, statement_body);
     }
     else
     {
         concatenate(push, store_argument);
-        concatenate(store_argument, after_prolog_label);
         concatenate(store_argument, statement_body);
     }
 

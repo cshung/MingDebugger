@@ -213,7 +213,17 @@ void debugger_impl::stack_walk()
         {
             if (function_symbol.entry_point <= ip && ip < function_symbol.after_exit)
             {
-                cout << function_symbol.function_name << endl;
+                cout << function_symbol.function_name;
+
+                for (auto&& local_symbols : function_symbol.locals)
+                {
+                    cout << " ";
+                    cout << local_symbols.local_name;
+                    cout << " = ";
+                    cout << this->m_virtual_machine_debugging_interface->read_memory(sp + local_symbols.address);
+                    cout << " ";
+                }
+                cout << endl;
 
                 // Unwinding the push instruction
                 push_instruction* push = (push_instruction*)this->m_virtual_machine_debugging_interface->get_instruction(function_symbol.entry_point);
