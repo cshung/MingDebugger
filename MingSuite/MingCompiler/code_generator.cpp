@@ -221,7 +221,8 @@ instruction_sequence code_generator_impl::generate_code(function_node* function,
 
     concatenate(epilog_label, pop);
     concatenate(pop, return_op);
-    result.tail = return_op;
+    concatenate(return_op, after_exit_label);
+    result.tail = after_exit_label;
 
     context->function_symbol_labels.insert(make_pair(function->function_name, symbols));
 
