@@ -15,6 +15,7 @@ public:
     context get_context();
     void set_context(context c);
     void remove_breakpoint(int address, instruction* original_instruction);
+    void stack_walk();
 
     // debugger_virtual_machine_interface
     virtual void on_break_instruction();
@@ -89,6 +90,11 @@ void debugger::write_memory(int address, int content)
     this->impl->write_memory(address, content);
 }
 
+void debugger::stack_walk()
+{
+    this->impl->stack_walk();
+}
+
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface), m_symbols(symbols)
 {
     this->breakpoint_to_restore = nullptr;
@@ -157,7 +163,7 @@ void debugger_impl::on_break_instruction()
     c.ip--;
     this->m_virtual_machine_debugging_interface->set_context(c);
     this->breakpoint_to_restore = breakpoint;
-    
+
 }
 void debugger_impl::on_single_step()
 {
@@ -193,6 +199,30 @@ void debugger_impl::remove_breakpoint(int address, instruction* original_instruc
     {
         this->breakpoint_to_restore = nullptr;
         this->m_virtual_machine_debugging_interface->set_single_step(false);
+    }
+}
+
+void debugger_impl::stack_walk()
+{
+    context c = this->get_context();
+    int ip = c.ip;
+    int sp = c.sp;
+    while (ip != -1)
+    {
+        for (auto&& function_symbol : this->m_symbols->functions)
+        {
+            if (function_symbol.entry_point <= ip && ip < function_symbol.after_exit)
+            {
+                cout << function_symbol.function_name << endl;
+
+                // Unwinding the push instruction
+                push_instruction* push = (push_instruction*)this->m_virtual_machine_debugging_interface->get_instruction(function_symbol.entry_point);
+                sp += push->offset;
+
+                // Unwinding the call instruction
+                ip = this->m_virtual_machine_debugging_interface->read_memory(++sp);
+            }
+        }
     }
 }
 

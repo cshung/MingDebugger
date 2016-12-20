@@ -83,6 +83,9 @@ void compiler_impl::compile()
         debugger->step_instruction();
         int argument_address = debugger->get_context().sp + 1;
         cout << debugger->read_memory(argument_address) << endl;
+
+        cout << "=================================" << endl;
+        debugger->stack_walk();
         debugger->resume();
         // Now we run to the end!
     }

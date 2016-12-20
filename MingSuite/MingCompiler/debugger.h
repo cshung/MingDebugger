@@ -26,13 +26,17 @@ public:
     debugger(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols);
     ~debugger();
 
+    // Low level debugging
     void resume();
     breakpoint* create_address_breakpoint(int address);
-    virtual context get_context();
-    virtual void set_context(context c);
-    virtual void step_instruction();
-    virtual int read_memory(int address);
-    virtual void write_memory(int address, int content);
+    context get_context();
+    void set_context(context c);
+    void step_instruction();
+    int read_memory(int address);
+    void write_memory(int address, int content);
+
+    // Source level debugging
+    void stack_walk();
 
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();
 private:
