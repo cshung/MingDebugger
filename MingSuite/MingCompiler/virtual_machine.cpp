@@ -8,7 +8,7 @@ class virtual_machine_impl : virtual_machine_debugging_interface
 public:
     virtual_machine_impl();
     void run(instruction_sequence instructions, int entry_point);
-    debugger* debug(instruction_sequence instructions, int entry_point);
+    debugger* debug(instruction_sequence instructions, symbols* symbols, int entry_point);
 
     // virtual_machine_debugging_interface
     virtual void resume();
@@ -62,9 +62,9 @@ void virtual_machine::run(instruction_sequence instructions, int entry_point)
     this->impl->run(instructions, entry_point);
 }
 
-debugger* virtual_machine::debug(instruction_sequence instructions, int entry_point)
+debugger* virtual_machine::debug(instruction_sequence instructions, symbols* symbols, int entry_point)
 {
-    return this->impl->debug(instructions, entry_point);
+    return this->impl->debug(instructions, symbols, entry_point);
 }
 
 virtual_machine_impl::virtual_machine_impl()
@@ -98,10 +98,10 @@ void virtual_machine_impl::run(instruction_sequence instructions, int entry_poin
     this->resume();
 }
 
-debugger* virtual_machine_impl::debug(instruction_sequence instructions, int entry_point)
+debugger* virtual_machine_impl::debug(instruction_sequence instructions, symbols* symbols, int entry_point)
 {
     this->setup(instructions, entry_point);
-    debugger* result = new debugger(this);
+    debugger* result = new debugger(this, symbols);
     this->m_debugger_virtual_machine_interface = result->get_debugger_virtual_machine_interface();
     return result;
 }

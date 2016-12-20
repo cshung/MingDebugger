@@ -67,7 +67,7 @@ void compiler_impl::compile()
 
         // TODO: Save the binaries
         virtual_machine vm;
-        debugger* debugger = vm.debug(binaries.instructions, binaries.entry_point);
+        debugger* debugger = vm.debug(binaries.instructions, &binaries.symbols, binaries.entry_point);
 
         // Setting a breakpoint at the entry point of the fib function
         breakpoint* bp = debugger->create_address_breakpoint(0);

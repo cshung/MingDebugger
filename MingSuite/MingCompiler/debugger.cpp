@@ -6,7 +6,7 @@ using namespace std;
 class debugger_impl : public debugger_virtual_machine_interface
 {
 public:
-    debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface);
+    debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols);
     void resume();
     breakpoint* create_address_breakpoint(int address);
     void step_instruction();
@@ -22,6 +22,7 @@ public:
     virtual void on_terminate();
 private:
     virtual_machine_debugging_interface* m_virtual_machine_debugging_interface;
+    symbols* m_symbols;
     unordered_map<int, breakpoint_impl*> breakpoints;
     breakpoint_impl* breakpoint_to_restore;
     bool is_single_step_requested;
@@ -38,9 +39,9 @@ public:
     instruction* m_original_instruction;
 };
 
-debugger::debugger(virtual_machine_debugging_interface* virtual_machine_debugging_interface)
+debugger::debugger(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols)
 {
-    this->impl = new debugger_impl(virtual_machine_debugging_interface);
+    this->impl = new debugger_impl(virtual_machine_debugging_interface, symbols);
 }
 
 debugger::~debugger()
@@ -88,7 +89,7 @@ void debugger::write_memory(int address, int content)
     this->impl->write_memory(address, content);
 }
 
-debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface)
+debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface), m_symbols(symbols)
 {
     this->breakpoint_to_restore = nullptr;
     this->is_single_step_requested = false;

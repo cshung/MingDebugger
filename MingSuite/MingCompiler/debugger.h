@@ -1,6 +1,7 @@
 #pragma once
 
 #include "instructions.h"
+#include "symbols.h"
 
 class debugger;
 class breakpoint;
@@ -22,7 +23,7 @@ struct context
 class debugger
 {
 public:
-    debugger(virtual_machine_debugging_interface* virtual_machine_debugging_interface);
+    debugger(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols);
     ~debugger();
 
     void resume();
