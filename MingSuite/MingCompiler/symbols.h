@@ -19,7 +19,18 @@ struct function_symbols
     vector<local_symbols> locals;
 };
 
+struct statement
+{
+    int start_line;
+    int start_column;
+    int end_line;
+    int end_column;
+    int start_address;
+    int end_address;
+};
+
 struct symbols
 {
     vector<function_symbols> functions;
+    vector<statement> statements;
 };
