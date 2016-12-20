@@ -37,6 +37,7 @@ public:
 
     // Source level debugging
     void stack_walk();
+    void step_into();
 
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();
 private:

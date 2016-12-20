@@ -16,6 +16,7 @@ public:
     void set_context(context c);
     void remove_breakpoint(int address, instruction* original_instruction);
     void stack_walk();
+    void step_into();
 
     // debugger_virtual_machine_interface
     virtual void on_break_instruction();
@@ -27,6 +28,7 @@ private:
     unordered_map<int, breakpoint_impl*> breakpoints;
     breakpoint_impl* breakpoint_to_restore;
     bool is_single_step_requested;
+    bool is_step_into_requested;
 };
 
 class breakpoint_impl
@@ -95,10 +97,16 @@ void debugger::stack_walk()
     this->impl->stack_walk();
 }
 
+void debugger::step_into()
+{
+    this->impl->step_into();
+}
+
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface), m_symbols(symbols)
 {
     this->breakpoint_to_restore = nullptr;
     this->is_single_step_requested = false;
+    this->is_step_into_requested = false;
 }
 
 void debugger_impl::resume()
@@ -147,10 +155,8 @@ void debugger_impl::write_memory(int address, int content)
 
 void debugger_impl::on_break_instruction()
 {
-    if (is_single_step_requested)
-    {
-        this->is_single_step_requested = false;
-    }
+    this->is_single_step_requested = false;
+    this->is_step_into_requested = false;
 
     int break_instruction_address = this->m_virtual_machine_debugging_interface->get_context().ip - 1;
     breakpoint_impl* breakpoint = this->breakpoints[break_instruction_address];
@@ -167,22 +173,46 @@ void debugger_impl::on_break_instruction()
 }
 void debugger_impl::on_single_step()
 {
-    if (this->breakpoint_to_restore != nullptr)
+    if (this->is_step_into_requested)
     {
-        int breakpoint_address = this->breakpoint_to_restore->address;
-        instruction* original_instruction = this->m_virtual_machine_debugging_interface->get_instruction(breakpoint_address);
-        this->breakpoint_to_restore->m_original_instruction = original_instruction;
-        this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, new break_instruction());
-        this->breakpoint_to_restore = nullptr;
-    }
-    if (is_single_step_requested)
-    {
-        this->is_single_step_requested = false;
+        int ip = this->m_virtual_machine_debugging_interface->get_context().ip;
+        bool reached_next_statement = false;
+        for (auto&& statement : this->m_symbols->statements)
+        {
+            if (ip == statement.start_address)
+            {
+                reached_next_statement = true;
+            }
+        }
+        if (!reached_next_statement)
+        {
+            this->m_virtual_machine_debugging_interface->set_single_step(true);
+            this->m_virtual_machine_debugging_interface->resume();
+        }
+        else
+        {
+            this->is_step_into_requested = false;
+        }
     }
     else
     {
-        this->m_virtual_machine_debugging_interface->set_single_step(false);
-        this->resume();
+        if (this->breakpoint_to_restore != nullptr)
+        {
+            int breakpoint_address = this->breakpoint_to_restore->address;
+            instruction* original_instruction = this->m_virtual_machine_debugging_interface->get_instruction(breakpoint_address);
+            this->breakpoint_to_restore->m_original_instruction = original_instruction;
+            this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, new break_instruction());
+            this->breakpoint_to_restore = nullptr;
+        }
+        if (is_single_step_requested)
+        {
+            this->is_single_step_requested = false;
+        }
+        else
+        {
+            this->m_virtual_machine_debugging_interface->set_single_step(false);
+            this->m_virtual_machine_debugging_interface->resume();
+        }
     }
 }
 
@@ -234,6 +264,13 @@ void debugger_impl::stack_walk()
             }
         }
     }
+}
+
+void debugger_impl::step_into()
+{
+    this->is_step_into_requested = true;
+    this->m_virtual_machine_debugging_interface->set_single_step(true);
+    this->resume();
 }
 
 breakpoint::breakpoint(breakpoint_impl* impl)
