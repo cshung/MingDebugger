@@ -33,8 +33,11 @@ private:
     bool is_single_step_requested;
     bool is_step_into_requested;
     bool is_step_over_requested;
+    bool is_step_out_requested;
     breakpoint* m_step_over_breakpoint;
+    breakpoint* m_step_out_breakpoint;
     int m_step_over_frame_sp;
+    int m_step_out_frame_sp;
 };
 
 class breakpoint_impl
@@ -129,7 +132,9 @@ debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machin
     this->is_single_step_requested = false;
     this->is_step_into_requested = false;
     this->is_step_over_requested = false;
+    this->is_step_out_requested = false;
     this->m_step_over_breakpoint = nullptr;
+    this->m_step_out_breakpoint = nullptr;
 }
 
 void debugger_impl::resume()
@@ -207,6 +212,12 @@ void debugger_impl::on_break_instruction()
             this->resume();
         }
     }
+    if (this->m_step_out_breakpoint != nullptr && break_instruction_address == this->m_step_out_breakpoint->get_address())
+    {
+        this->m_virtual_machine_debugging_interface->set_single_step(true);
+        this->breakpoint_to_restore = breakpoint;
+        this->resume();
+    }
     else
     {
         this->is_step_over_requested = false;
@@ -225,12 +236,27 @@ void debugger_impl::on_single_step()
         this->m_virtual_machine_debugging_interface->set_instruction(breakpoint_address, new break_instruction());
         this->breakpoint_to_restore = nullptr;
     }
-    if (this->is_step_into_requested || this->is_step_over_requested)
+    if (this->is_step_into_requested || this->is_step_over_requested || this->is_step_out_requested)
     {
         if (this->m_step_over_breakpoint != nullptr)
         {
             this->m_virtual_machine_debugging_interface->set_single_step(false);
             this->resume();
+        }
+        else if (this->m_step_out_breakpoint != nullptr)
+        {
+            if (this->get_context().sp > this->m_step_out_frame_sp)
+            {
+                this->m_step_out_breakpoint->remove();
+                this->m_step_out_breakpoint = nullptr;
+                this->m_virtual_machine_debugging_interface->set_single_step(true);
+                this->resume();
+            }
+            else
+            {
+                this->m_virtual_machine_debugging_interface->set_single_step(false);
+                this->resume();
+            }
         }
         else
         {
@@ -271,7 +297,9 @@ void debugger_impl::on_single_step()
             {
                 this->is_step_into_requested = false;
                 this->is_step_over_requested = false;
+                this->is_step_out_requested = false;
                 this->m_step_over_breakpoint = nullptr;
+                this->m_virtual_machine_debugging_interface->set_single_step(false);
             }
         }
     }
@@ -297,6 +325,7 @@ void debugger_impl::on_terminate()
 void debugger_impl::remove_breakpoint(int address, instruction* original_instruction)
 {
     this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
+    this->breakpoints.erase(address);
 
     // If the currently removing breakpoint is to be restored - do not do that anymore.
     if (this->breakpoint_to_restore != nullptr && this->breakpoint_to_restore->address == address)
@@ -356,7 +385,19 @@ void debugger_impl::step_over()
 
 void debugger_impl::step_out()
 {
-    // TODO: implementation
+    this->is_step_out_requested = true;
+    context context = this->get_context();
+    int ip = context.ip;
+    this->m_step_out_frame_sp = context.sp;
+    for (auto&& function_symbol : this->m_symbols->functions)
+    {
+        if (function_symbol.entry_point <= ip && ip < function_symbol.after_exit)
+        {
+            this->m_step_out_breakpoint = this->create_address_breakpoint(function_symbol.after_exit - 1);
+            this->m_virtual_machine_debugging_interface->resume();
+            break;
+        }
+    }
 }
 
 source_span debugger_impl::get_source_span()

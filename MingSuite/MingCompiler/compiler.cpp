@@ -77,23 +77,48 @@ void compiler_impl::compile()
         debugger->resume();
         // Reach the breakpoint again - what is the argument?
         cout << debugger->get_context().r1 << endl;
+        // Removing the breakpoint
         bp->remove();
         cout << debugger->get_context().ip << endl;
+        // Step over the prolog
         debugger->step_instruction();
         debugger->step_instruction();
+        // Read the argument through raw memory access
         int argument_address = debugger->get_context().sp + 1;
         cout << debugger->read_memory(argument_address) << endl;
 
+        // Starting source debugging
         cout << "=================================" << endl;
+
+        // Starting source debugging
+        debugger->get_source_span().show(); cout << endl;
         debugger->stack_walk();
-        debugger->get_source_span().show(); cout << endl;
+
         debugger->step_into();
+        
         debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
         debugger->step_into();
+
         debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
+        debugger->step_into();
+
+        debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
+        debugger->step_out();
+
+        debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
         debugger->step_over();
+
         debugger->get_source_span().show(); cout << endl;
         debugger->stack_walk();
+        
         debugger->resume();
         // Now we run to the end!
     }

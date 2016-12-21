@@ -331,9 +331,9 @@ instruction_sequence code_generator_impl::generate_code(return_statement_node* r
     branch_instruction* branch_to_epilog = new branch_instruction();
     branch_to_epilog->branchTo = context->epilog_label;
 
-    result.head = before_return_label;
-    concatenate(before_return_label, value_code);
-    concatenate(value_code, load_value);
+    result.head = value_code.head;
+    concatenate(value_code, before_return_label);
+    concatenate(before_return_label, load_value);
     concatenate(load_value, branch_to_epilog);
     result.tail = branch_to_epilog;
 
