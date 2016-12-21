@@ -39,6 +39,7 @@ public:
     void stack_walk();
     void step_into();
     void step_over();
+    void step_out();
 
     source_span get_source_span();
 

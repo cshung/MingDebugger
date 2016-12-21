@@ -18,6 +18,7 @@ public:
     void stack_walk();
     void step_into();
     void step_over();
+    void step_out();
     source_span get_source_span();
 
     // debugger_virtual_machine_interface
@@ -110,6 +111,11 @@ void debugger::step_into()
 void debugger::step_over()
 {
     this->impl->step_over();
+}
+
+void debugger::step_out()
+{
+    this->impl->step_out();
 }
 
 source_span debugger::get_source_span()
@@ -346,6 +352,11 @@ void debugger_impl::step_over()
     this->is_step_over_requested = true;
     this->m_virtual_machine_debugging_interface->set_single_step(true);
     this->resume();
+}
+
+void debugger_impl::step_out()
+{
+    // TODO: implementation
 }
 
 source_span debugger_impl::get_source_span()
