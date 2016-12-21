@@ -40,6 +40,8 @@ public:
     void step_into();
     void step_over();
 
+    source_span get_source_span();
+
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();
 private:
     debugger_impl* impl;

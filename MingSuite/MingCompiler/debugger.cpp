@@ -18,6 +18,7 @@ public:
     void stack_walk();
     void step_into();
     void step_over();
+    source_span get_source_span();
 
     // debugger_virtual_machine_interface
     virtual void on_break_instruction();
@@ -109,6 +110,11 @@ void debugger::step_into()
 void debugger::step_over()
 {
     this->impl->step_over();
+}
+
+source_span debugger::get_source_span()
+{
+    return this->impl->get_source_span();
 }
 
 debugger_impl::debugger_impl(virtual_machine_debugging_interface* virtual_machine_debugging_interface, symbols* symbols) : m_virtual_machine_debugging_interface(virtual_machine_debugging_interface), m_symbols(symbols)
@@ -340,6 +346,33 @@ void debugger_impl::step_over()
     this->is_step_over_requested = true;
     this->m_virtual_machine_debugging_interface->set_single_step(true);
     this->resume();
+}
+
+source_span debugger_impl::get_source_span()
+{
+    int address = this->get_context().ip;
+
+    // Find the statement with smallest address while at least as large as the current IP
+    int best_address = -1;
+    source_span best_source_span;
+    for (auto&& statement : this->m_symbols->statements)
+    {
+        if (statement.start_address >= address)
+        {
+            if (best_address == -1)
+            {
+                best_address = statement.start_address;
+                best_source_span = statement.source_span;
+            }
+            else if (statement.start_address < best_address)
+            {
+                best_address = statement.start_address;
+                best_source_span = statement.source_span;
+            }
+        }
+    }
+
+    return best_source_span;
 }
 
 breakpoint::breakpoint(breakpoint_impl* impl)

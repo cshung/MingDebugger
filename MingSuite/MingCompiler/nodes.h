@@ -1,5 +1,7 @@
 #pragma once
 
+#include "source_location.h"
+
 struct program_node;
 struct function_node;
 struct statement_node;
@@ -10,10 +12,7 @@ class parser_impl;
 
 struct parse_node
 {
-    int begin_line;
-    int begin_column;
-    int end_line;
-    int end_column;
+    source_span source_span;
 };
 
 struct program_node : parse_node

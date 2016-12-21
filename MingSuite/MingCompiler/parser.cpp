@@ -50,8 +50,8 @@ void parser_impl::scan()
 program_node* parser_impl::parse_program()
 {
     program_node* result = new program_node();
-    result->begin_line = this->m_scanner->get_token_begin_line();
-    result->begin_column = this->m_scanner->get_token_begin_column();
+    result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+    result->source_span.begin.column = this->m_scanner->get_token_begin_column();
     result->function = parse_function();
     function_node* last_function = result->function;
     if (last_function != nullptr)
@@ -75,8 +75,8 @@ program_node* parser_impl::parse_program()
         }
         if (this->m_scanner->get_token_type() == eof)
         {
-            result->end_line = this->m_last_token_end_line;
-            result->end_column = this->m_last_token_end_column;
+            result->source_span.end.line = this->m_last_token_end_line;
+            result->source_span.end.column = this->m_last_token_end_column;
             return result;
         }
     }
@@ -90,8 +90,8 @@ program_node* parser_impl::parse_program()
 function_node* parser_impl::parse_function()
 {
     function_node* result = new function_node();
-    result->begin_line = this->m_scanner->get_token_begin_line();
-    result->begin_column = this->m_scanner->get_token_begin_column();
+    result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+    result->source_span.begin.column = this->m_scanner->get_token_begin_column();
     if (this->m_scanner->get_token_type() == function)
     {
         this->scan();
@@ -118,8 +118,8 @@ function_node* parser_impl::parse_function()
                                 if (this->m_scanner->get_token_type() == right_brace)
                                 {
                                     this->scan();
-                                    result->end_line = this->m_last_token_end_line;
-                                    result->end_column = this->m_last_token_end_column;
+                                    result->source_span.end.line = this->m_last_token_end_line;
+                                    result->source_span.end.column = this->m_last_token_end_column;
                                     return result;
                                 }
                             }
@@ -138,8 +138,8 @@ function_node* parser_impl::parse_function()
                             if (this->m_scanner->get_token_type() == right_brace)
                             {
                                 this->scan();
-                                result->end_line = this->m_last_token_end_line;
-                                result->end_column = this->m_last_token_end_column;
+                                result->source_span.end.line = this->m_last_token_end_line;
+                                result->source_span.end.column = this->m_last_token_end_column;
                                 return result;
                             }
                         }
@@ -159,8 +159,8 @@ statement_node* parser_impl::parse_statement()
     {
         if_statement_node* if_result = new if_statement_node();
         result = if_result;
-        result->begin_line = this->m_scanner->get_token_begin_line();
-        result->begin_column = this->m_scanner->get_token_begin_column();
+        result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+        result->source_span.begin.column = this->m_scanner->get_token_begin_column();
         this->scan();
         if (this->m_scanner->get_token_type() == left_bracket)
         {
@@ -192,8 +192,8 @@ statement_node* parser_impl::parse_statement()
                                             if (this->m_scanner->get_token_type() == right_brace)
                                             {
                                                 this->scan();
-                                                result->end_line = this->m_last_token_end_line;
-                                                result->end_column = this->m_last_token_end_column;
+                                                result->source_span.end.line = this->m_last_token_end_line;
+                                                result->source_span.end.column = this->m_last_token_end_column;
                                                 return if_result;
                                             }
                                         }
@@ -210,8 +210,8 @@ statement_node* parser_impl::parse_statement()
     {
         return_statement_node* return_result = new return_statement_node();
         result = return_result;
-        result->begin_line = this->m_scanner->get_token_begin_line();
-        result->begin_column = this->m_scanner->get_token_begin_column();
+        result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+        result->source_span.begin.column = this->m_scanner->get_token_begin_column();
         this->scan();
         return_result->value = this->parse_expression();
         if (return_result->value != nullptr)
@@ -219,8 +219,8 @@ statement_node* parser_impl::parse_statement()
             if (this->m_scanner->get_token_type() == semi_colon)
             {
                 this->scan();
-                result->end_line = this->m_last_token_end_line;
-                result->end_column = this->m_last_token_end_column;
+                result->source_span.end.line = this->m_last_token_end_line;
+                result->source_span.end.column = this->m_last_token_end_column;
                 return result;
             }
         }
@@ -229,8 +229,8 @@ statement_node* parser_impl::parse_statement()
     {
         call_statement_node* call_result = new call_statement_node();
         result = call_result;
-        result->begin_line = this->m_scanner->get_token_begin_line();
-        result->begin_column = this->m_scanner->get_token_begin_column();
+        result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+        result->source_span.begin.column = this->m_scanner->get_token_begin_column();
         call_result->function_name = this->m_scanner->get_token_string();
         this->scan();
         if (this->m_scanner->get_token_type() == left_bracket)
@@ -245,8 +245,8 @@ statement_node* parser_impl::parse_statement()
                     if (this->m_scanner->get_token_type() == semi_colon)
                     {
                         this->scan();
-                        result->end_line = this->m_last_token_end_line;
-                        result->end_column = this->m_last_token_end_column;
+                        result->source_span.end.line = this->m_last_token_end_line;
+                        result->source_span.end.column = this->m_last_token_end_column;
                         return result;
                     }
                 }
@@ -294,8 +294,8 @@ expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
     {
         plus_node* plus_result = new plus_node();
         result = plus_result;
-        result->begin_line = prefix->begin_line;
-        result->begin_column = prefix->begin_column;
+        result->source_span.begin.line = prefix->source_span.begin.line;
+        result->source_span.begin.column = prefix->source_span.begin.column;
         plus_result->left = prefix;
         this->scan();
         plus_result->right = this->parse_term();
@@ -311,8 +311,8 @@ expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
             }
             else
             {
-                result->end_line = this->m_last_token_end_line;
-                result->end_column = this->m_last_token_end_column;
+                result->source_span.end.line = this->m_last_token_end_line;
+                result->source_span.end.column = this->m_last_token_end_column;
                 return result;
             }
         }
@@ -321,8 +321,8 @@ expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
     {
         minus_node* minus_result = new minus_node();
         result = minus_result;
-        result->begin_line = prefix->begin_line;
-        result->begin_column = prefix->begin_column;
+        result->source_span.begin.line = prefix->source_span.begin.line;
+        result->source_span.begin.column = prefix->source_span.begin.column;
         minus_result->left = prefix;
         this->scan();
         minus_result->right = this->parse_term();
@@ -338,8 +338,8 @@ expression_node* parser_impl::parse_expression_suffix(expression_node* prefix)
             }
             else
             {
-                result->end_line = this->m_last_token_end_line;
-                result->end_column = this->m_last_token_end_column;
+                result->source_span.end.line = this->m_last_token_end_line;
+                result->source_span.end.column = this->m_last_token_end_column;
                 return result;
             }
         }
@@ -359,12 +359,12 @@ term_node* parser_impl::parse_term()
     if (this->m_scanner->get_token_type() == integer)
     {
         literal_node* literal_result = new literal_node();
-        literal_result->begin_line = this->m_scanner->get_token_begin_line();
-        literal_result->begin_column = this->m_scanner->get_token_begin_column();
+        literal_result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+        literal_result->source_span.begin.column = this->m_scanner->get_token_begin_column();
         literal_result->value = this->m_scanner->get_token_integer_value();
         this->scan();
-        literal_result->end_line = this->m_last_token_end_line;
-        literal_result->end_column = this->m_last_token_end_column;
+        literal_result->source_span.end.line = this->m_last_token_end_line;
+        literal_result->source_span.end.column = this->m_last_token_end_column;
         return literal_result;
     }
     else if (this->m_scanner->get_token_type() == identifier)
@@ -377,8 +377,8 @@ term_node* parser_impl::parse_term()
         {
             call_node* call_result = new call_node();
             result = call_result;
-            result->begin_line = begin_line;
-            result->begin_column = begin_column;
+            result->source_span.begin.line = begin_line;
+            result->source_span.begin.column = begin_column;
             call_result->function_name = identifier_name;
             this->scan();
             call_result->argument = this->parse_expression();
@@ -387,8 +387,8 @@ term_node* parser_impl::parse_term()
                 if (this->m_scanner->get_token_type() == right_bracket)
                 {
                     this->scan();
-                    result->end_line = this->m_last_token_end_line;
-                    result->end_column = this->m_last_token_end_column;
+                    result->source_span.end.line = this->m_last_token_end_line;
+                    result->source_span.end.column = this->m_last_token_end_column;
                     return result;
                 }
             }
@@ -396,11 +396,11 @@ term_node* parser_impl::parse_term()
         else
         {
             identifier_node* identifier_result = new identifier_node();
-            identifier_result->begin_line = begin_line;
-            identifier_result->begin_column = begin_column;
+            identifier_result->source_span.begin.line = begin_line;
+            identifier_result->source_span.begin.column = begin_column;
             identifier_result->identifier_name = identifier_name;
-            identifier_result->end_line = this->m_last_token_end_line;
-            identifier_result->end_column = this->m_last_token_end_column;
+            identifier_result->source_span.end.line = this->m_last_token_end_line;
+            identifier_result->source_span.end.column = this->m_last_token_end_column;
             return identifier_result;
         }
     }
@@ -415,8 +415,8 @@ term_node* parser_impl::parse_term()
 condition_node* parser_impl::parse_condition()
 {
     condition_node* result = new condition_node();
-    result->begin_line = this->m_scanner->get_token_begin_line();
-    result->begin_column = this->m_scanner->get_token_begin_column();
+    result->source_span.begin.line = this->m_scanner->get_token_begin_line();
+    result->source_span.begin.column = this->m_scanner->get_token_begin_column();
     if (this->m_scanner->get_token_type() == identifier)
     {
         result->variable_name = this->m_scanner->get_token_string();
@@ -431,8 +431,8 @@ condition_node* parser_impl::parse_condition()
                 {
                     result->value = this->m_scanner->get_token_integer_value();
                     this->scan();
-                    result->end_line = this->m_last_token_end_line;
-                    result->end_column = this->m_last_token_end_column;
+                    result->source_span.end.line = this->m_last_token_end_line;
+                    result->source_span.end.column = this->m_last_token_end_column;
                     return result;
                 }
             }

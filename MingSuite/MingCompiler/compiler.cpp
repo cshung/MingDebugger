@@ -86,13 +86,13 @@ void compiler_impl::compile()
 
         cout << "=================================" << endl;
         debugger->stack_walk();
-        cout << debugger->get_context().ip << endl;
+        debugger->get_source_span().show(); cout << endl;
         debugger->step_into();
-        cout << debugger->get_context().ip << endl;
+        debugger->get_source_span().show(); cout << endl;
         debugger->step_into();
-        cout << debugger->get_context().ip << endl;
+        debugger->get_source_span().show(); cout << endl;
         debugger->step_over();
-        cout << debugger->get_context().ip << endl;
+        debugger->get_source_span().show(); cout << endl;
         debugger->stack_walk();
         debugger->resume();
         // Now we run to the end!

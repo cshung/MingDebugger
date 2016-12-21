@@ -14,10 +14,7 @@ struct function_symbol_labels
 struct statement_symbol_label
 {
     label_instruction* statement_label;
-    int begin_line;
-    int begin_column;
-    int end_line;
-    int end_column;
+    source_span source_span;
 };
 
 struct code_generation_context
@@ -182,10 +179,7 @@ code_generation_outputs code_generator_impl::generate_code(program_node* program
     {
         statement_symbol symbol;
         symbol.start_address = statement_symbol_label.statement_label->address;
-        symbol.begin_line = statement_symbol_label.begin_line;
-        symbol.begin_column = statement_symbol_label.begin_column;
-        symbol.end_line = statement_symbol_label.end_line;
-        symbol.end_column = statement_symbol_label.end_column;
+        symbol.source_span = statement_symbol_label.source_span;
         output.symbols.statements.push_back(symbol);
     }
 
@@ -345,10 +339,7 @@ instruction_sequence code_generator_impl::generate_code(return_statement_node* r
 
     statement_symbol_label symbol;
     symbol.statement_label = before_return_label;
-    symbol.begin_line = return_statement->begin_line;
-    symbol.begin_column = return_statement->begin_column;
-    symbol.end_line = return_statement->end_line;
-    symbol.end_column = return_statement->end_column;
+    symbol.source_span = return_statement->source_span;
 
     context->statement_symbol_labels.push_back(symbol);
 
@@ -388,10 +379,7 @@ instruction_sequence code_generator_impl::generate_code(call_statement_node* cal
 
     statement_symbol_label statement_symbol;
     statement_symbol.statement_label = before_call_label;
-    statement_symbol.begin_line = call_statement->begin_line;
-    statement_symbol.begin_column = call_statement->begin_column;
-    statement_symbol.end_line = call_statement->end_line;
-    statement_symbol.end_column = call_statement->end_column;
+    statement_symbol.source_span = call_statement->source_span;
 
     context->statement_symbol_labels.push_back(statement_symbol);
 
@@ -482,10 +470,7 @@ instruction_sequence code_generator_impl::generate_code(call_node* call, code_ge
 
     statement_symbol_label symbol;
     symbol.statement_label = before_call_label;
-    symbol.begin_line = call->begin_line;
-    symbol.begin_column = call->begin_column;
-    symbol.end_line = call->end_line;
-    symbol.end_column = call->end_column;
+    symbol.source_span = call->source_span;
 
     context->statement_symbol_labels.push_back(symbol);
 
@@ -596,10 +581,7 @@ instruction_sequence code_generator_impl::generate_code(condition_node* conditio
 
     statement_symbol_label statement_symbol;
     statement_symbol.statement_label = before_condition_label;
-    statement_symbol.begin_line = condition->begin_line;
-    statement_symbol.begin_column = condition->begin_column;
-    statement_symbol.end_line = condition->end_line;
-    statement_symbol.end_column = condition->end_column;
+    statement_symbol.source_span = condition->source_span;
 
     context->statement_symbol_labels.push_back(statement_symbol);
 

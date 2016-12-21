@@ -151,6 +151,7 @@
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="program.cpp" />
     <ClCompile Include="scanner.cpp" />
+    <ClCompile Include="source_location.cpp" />
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="virtual_machine.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="nodes.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="scanner.h" />
+    <ClInclude Include="source_location.h" />
     <ClInclude Include="symbols.h" />
     <ClInclude Include="utilities.h" />
     <ClInclude Include="virtual_machine.h" />

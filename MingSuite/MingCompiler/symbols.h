@@ -1,9 +1,9 @@
 #pragma once
 
+#include "source_location.h"
 #include <string>
 #include <vector>
 using namespace std;
-
 
 struct local_symbols
 {
@@ -21,10 +21,7 @@ struct function_symbol
 
 struct statement_symbol
 {
-    int begin_line;
-    int begin_column;
-    int end_line;
-    int end_column;
+    source_span source_span;
     int start_address;
 };
 
