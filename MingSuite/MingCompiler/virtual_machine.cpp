@@ -111,18 +111,7 @@ void virtual_machine_impl::resume()
     while (this->ip != -1)
     {
         instruction* current = code_memory[this->ip];
-        /*
-        current->print();
-        */
         this->execute(current);
-        /*
-        cout << "R1 = " << this->registers[1] << endl;
-        cout << "R2 = " << this->registers[2] << endl;
-        cout << "R3 = " << this->registers[3] << endl;
-        cout << "R4 = " << this->registers[4] << endl;
-        cout << "SP = " << this->sp << endl;
-        cout << "IP = " << this->ip << endl;
-        */
         if (this->break_instruction_executed)
         {
             break;
@@ -267,12 +256,14 @@ void virtual_machine_impl::execute(branch_on_zero_instruction* instruction)
 {
     if (this->registers[instruction->operand] == 0)
     {
+        // Because the main execute routine would add 1 to the IP, subtract 1 here to compensate for it.
         this->ip = instruction->branchTo->address - 1;
     }
 }
 
 void virtual_machine_impl::execute(branch_instruction* instruction)
 {
+    // Because the main execute routine would add 1 to the IP, subtract 1 here to compensate for it.
     this->ip = instruction->branchTo->address - 1;
 }
 
@@ -291,12 +282,16 @@ void virtual_machine_impl::execute(call_instruction* instruction)
 {
     this->data_memory[this->sp] = this->ip + 1;
     this->sp--;
+
+    // Because the main execute routine would add 1 to the IP, subtract 1 here to compensate for it.
     this->ip = instruction->target->address - 1;
 }
 
 void virtual_machine_impl::execute(return_instruction* instruction)
 {
     ++this->sp;
+
+    // Because the main execute routine would add 1 to the IP, subtract 1 here to compensate for it.
     this->ip = this->data_memory[this->sp] - 1;
 }
 
