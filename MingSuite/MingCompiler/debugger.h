@@ -40,7 +40,7 @@ public:
     void step_into();
     void step_over();
     void step_out();
-
+    breakpoint* create_source_location_breakpoint(int line, int column);
     source_span get_source_span();
 
     debugger_virtual_machine_interface* get_debugger_virtual_machine_interface();

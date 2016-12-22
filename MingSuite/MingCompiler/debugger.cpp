@@ -19,6 +19,7 @@ public:
     void step_into();
     void step_over();
     void step_out();
+    breakpoint* create_source_location_breakpoint(int line, int column);
     source_span get_source_span();
 
     // debugger_virtual_machine_interface
@@ -121,6 +122,11 @@ void debugger::step_out()
     this->impl->step_out();
 }
 
+breakpoint* debugger::create_source_location_breakpoint(int line, int column)
+{
+    return this->impl->create_source_location_breakpoint(line, column);
+}
+
 source_span debugger::get_source_span()
 {
     return this->impl->get_source_span();
@@ -202,6 +208,7 @@ void debugger_impl::on_break_instruction()
         {
             this->m_step_over_breakpoint->remove();
             this->m_step_over_breakpoint = nullptr;
+            this->breakpoint_to_restore = nullptr;
             this->m_virtual_machine_debugging_interface->set_single_step(true);
             this->resume();
         }
@@ -212,7 +219,7 @@ void debugger_impl::on_break_instruction()
             this->resume();
         }
     }
-    if (this->m_step_out_breakpoint != nullptr && break_instruction_address == this->m_step_out_breakpoint->get_address())
+    else if (this->m_step_out_breakpoint != nullptr && break_instruction_address == this->m_step_out_breakpoint->get_address())
     {
         this->m_virtual_machine_debugging_interface->set_single_step(true);
         this->breakpoint_to_restore = breakpoint;
@@ -325,7 +332,7 @@ void debugger_impl::on_terminate()
 void debugger_impl::remove_breakpoint(int address, instruction* original_instruction)
 {
     this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
-    // this->breakpoints.erase(address);
+    this->breakpoints.erase(address);
 
     // If the currently removing breakpoint is to be restored - do not do that anymore.
     if (this->breakpoint_to_restore != nullptr && this->breakpoint_to_restore->address == address)
@@ -397,6 +404,43 @@ void debugger_impl::step_out()
             this->m_virtual_machine_debugging_interface->resume();
             break;
         }
+    }
+}
+
+breakpoint* debugger_impl::create_source_location_breakpoint(int line, int column)
+{
+    int best_line = -1;
+    int best_column = -1;
+    int best_address = -1;
+    for (auto&& statement : this->m_symbols->statements)
+    {
+        int statement_line = statement.source_span.begin.line;
+        int statement_column = statement.source_span.begin.line;
+        if ((statement_line > line) || ((statement_line == line) && (statement_column >= column)))
+        {
+            if (best_line == -1)
+            {
+                best_line = statement_line;
+                best_column = statement_column;
+                best_address = statement.start_address;
+            }
+            else if ((statement_line < best_line) || 
+                ((statement_line == best_line) && (statement_column < best_column)) || 
+                ((statement_line == best_line) && (statement_column == best_column) && (statement.start_address < best_address)))
+            {
+                best_line = statement_line;
+                best_column = statement_column;
+                best_address = statement.start_address;
+            }
+        }
+    }
+    if (best_address != -1)
+    {
+        return this->create_address_breakpoint(best_address);
+    }
+    else
+    {
+        return nullptr;
     }
 }
 

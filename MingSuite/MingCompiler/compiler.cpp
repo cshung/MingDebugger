@@ -119,7 +119,18 @@ void compiler_impl::compile()
         debugger->get_source_span().show(); cout << endl;
         debugger->stack_walk();
         
+        breakpoint* source_breakpoint = debugger->create_source_location_breakpoint(2, 1);
         debugger->resume();
+
+        debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
+        source_breakpoint->remove();
+
+        debugger->resume();
+        debugger->get_source_span().show(); cout << endl;
+        debugger->stack_walk();
+
         // Now we run to the end!
     }
 }
