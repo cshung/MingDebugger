@@ -325,7 +325,7 @@ void debugger_impl::on_terminate()
 void debugger_impl::remove_breakpoint(int address, instruction* original_instruction)
 {
     this->m_virtual_machine_debugging_interface->set_instruction(address, original_instruction);
-    this->breakpoints.erase(address);
+    // this->breakpoints.erase(address);
 
     // If the currently removing breakpoint is to be restored - do not do that anymore.
     if (this->breakpoint_to_restore != nullptr && this->breakpoint_to_restore->address == address)
