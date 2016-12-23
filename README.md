@@ -5,10 +5,10 @@ MingDebugger is a simple prototype to illustrate how debugging work in practice.
 It is a compiler that take a source file to a 'binary' and 'symbol' file. In this prototype, we will support a very simple programming language take can compute the Fibonacci numbers.
 
     function fib(a) {
-      if (a == 0) {
+      if (a == 1) {
         return 1;
       } else {
-        if (a == 1) {
+        if (a == 2) {
           return 1;
         } else {
           return fib(a - 1) + fib(a - 2);
