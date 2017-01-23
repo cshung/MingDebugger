@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "utilities.h"
+#include <cstdlib>
 
 class scanner_impl
 {

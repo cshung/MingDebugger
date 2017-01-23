@@ -1,6 +1,7 @@
 #include "code_generator.h"
 
 #include <unordered_map>
+#include <cstring>
 using namespace std;
 
 struct function_symbol_labels
@@ -8,13 +9,13 @@ struct function_symbol_labels
     string function_name;
     label_instruction* entry_point_label;
     label_instruction* after_exit_label;
-    vector<local_symbols> local_symbols;
+    vector<struct local_symbols> local_symbols;
 };
 
 struct statement_symbol_label
 {
     label_instruction* statement_label;
-    source_span source_span;
+    struct source_span source_span;
 };
 
 struct code_generation_context
@@ -22,8 +23,8 @@ struct code_generation_context
     code_generation_context();
     ~code_generation_context();
     unordered_map<string, label_instruction*> function_labels;
-    vector<function_symbol_labels> function_symbol_labels;
-    vector<statement_symbol_label> statement_symbol_labels;
+    vector<struct function_symbol_labels> function_symbol_labels;
+    vector<struct statement_symbol_label> statement_symbol_labels;
     unordered_map<string, int> variables;
     label_instruction* epilog_label;
     int tempUsed;

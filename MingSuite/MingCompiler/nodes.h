@@ -12,7 +12,7 @@ class parser_impl;
 
 struct parse_node
 {
-    source_span source_span;
+    struct source_span source_span;
 };
 
 struct program_node : parse_node

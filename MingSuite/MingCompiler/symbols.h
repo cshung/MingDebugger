@@ -16,17 +16,17 @@ struct function_symbol
     string function_name;
     int entry_point;
     int after_exit;
-    vector<local_symbols> locals;
+    vector<struct local_symbols> locals;
 };
 
 struct statement_symbol
 {
-    source_span source_span;
+    struct source_span source_span;
     int start_address;
 };
 
 struct symbols
 {
-    vector<function_symbol> functions;
-    vector<statement_symbol> statements;
+    vector<struct function_symbol> functions;
+    vector<struct statement_symbol> statements;
 };

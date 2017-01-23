@@ -1,4 +1,5 @@
 #include "utilities.h"
+#include <cstring>
 #include <fstream>
 #include <vector>
 using namespace std;

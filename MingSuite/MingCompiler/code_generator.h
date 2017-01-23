@@ -10,7 +10,7 @@ struct code_generation_outputs
 {
     instruction_sequence instructions;
     int entry_point;
-    symbols symbols;
+    struct symbols symbols;
 };
 
 class code_generator
