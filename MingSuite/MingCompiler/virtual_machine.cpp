@@ -1,6 +1,7 @@
 #include "virtual_machine.h"
 #include <vector>
 #include <iostream>
+#include <cassert>
 using namespace std;
 
 class virtual_machine_impl : virtual_machine_debugging_interface
@@ -228,6 +229,8 @@ void virtual_machine_impl::execute(instruction* instruction)
     case instruction_type::break_instruction_type:
         execute((break_instruction*)instruction);
         break;
+    case instruction_type::label_instruction_type:
+        assert(false);
     }
     this->ip++;
 }
